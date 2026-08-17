@@ -9,8 +9,8 @@ import { findMember } from "@/mongo/controls/member/memberControls"
 import { findProject } from "@/mongo/controls/project/projectControls"
 import { findItem } from "@/mongo/controls/member/project/items/findItem"
 
-import InfoPageLayout from "fx/ui/InfoPageLayout"
-import Permission, { NoPermission, PermissionCodes, permission } from "fx/ui/PermissionComponent"
+import InfoPageLayout from "@/fx/ui/InfoPageLayout"
+import Permission, { NoPermission, PermissionCodes, permission } from "@/fx/ui/PermissionComponent"
 
 import { Project, ProjectContext } from "@/react/project/"
 import { Member, MemberContext } from "@/react/members"

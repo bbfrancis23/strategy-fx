@@ -3,7 +3,7 @@
 
 import { Stack } from "@mui/material"
 import Head from "next/head"
-import InfoPageLayout from "fx/ui/InfoPageLayout"
+import InfoPageLayout from "@/fx/ui/InfoPageLayout"
 
 const Page = () => (
   <>

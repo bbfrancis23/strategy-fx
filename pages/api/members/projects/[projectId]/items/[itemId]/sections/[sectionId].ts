@@ -1,5 +1,5 @@
-import {patchSection} from 'mongo/controls/member/project/items/sections/patchSection'
-import {deleteSection} from 'mongo/controls/member/project/items/sections/deleteSection'
+import {patchSection} from '@/mongo/controls/member/project/items/sections/patchSection'
+import {deleteSection} from '@/mongo/controls/member/project/items/sections/deleteSection'
 import {NextApiRequest, NextApiResponse} from 'next'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -8,7 +8,7 @@ import Board from '@/mongo/schemas/BoardSchema'
 
 import axios from 'axios'
 import {NextApiRequest, NextApiResponse} from 'next'
-import {PatchBoardResponse} from 'pages/api/members/projects/[projectId]/boards/boardsIdHandler'
+import {PatchBoardResponse} from '@/pages/api/members/projects/[projectId]/boards/boardsIdHandler'
 import {
   forbiddenResponse,
   internalServerErrorResponse,
@@ -51,7 +51,7 @@ export const patchBoard = async (req: NextApiRequest, res: NextApiResponse<Patch
   if (board.project.toString() !== projectId) {
     forbiddenResponse(
       res,
-      'You do not have authorization to change the project and board do not match'
+      'You do not have authorization to change the project and board do not match',
     )
     return
   }

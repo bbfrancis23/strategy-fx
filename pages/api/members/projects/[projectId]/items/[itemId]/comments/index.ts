@@ -1,4 +1,4 @@
-import {createComment} from 'mongo/controls/member/project/items/comments/createComment'
+import {createComment} from '@/mongo/controls/member/project/items/comments/createComment'
 import {NextApiRequest, NextApiResponse} from 'next'
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {

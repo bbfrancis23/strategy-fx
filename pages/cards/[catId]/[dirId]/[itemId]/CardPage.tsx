@@ -6,7 +6,7 @@ import { findItem } from "@/mongo/controls/member/project/items/findItem"
 import {findProjectItems} from "@/mongo/controls/member/project/items/findProjectItems"
 import { findProject, findProjectBoards } from "@/mongo/controls/project/projectControls"
 import Head from 'next/head'
-import { WEBSITE_PROJECT_ID } from "pages/HomePage"
+import { WEBSITE_PROJECT_ID } from "@/pages/HomePage"
 import { WebsiteBoards } from "@/react/app"
 import { Item, ItemContext, getItemDirectory } from "@/react/item"
 import { Section } from "@/react/section"

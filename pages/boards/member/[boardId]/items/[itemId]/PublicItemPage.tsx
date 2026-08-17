@@ -8,7 +8,7 @@ import { Board, BoardContext } from "@/react/board"
 import { Section } from "@/react/section"
 import { Item, ItemContext } from "@/react/item"
 import { useEffect, useState } from "react"
-import { InfoPageLayout, FxCodeEditor, BoardDrawer} from "fx/ui"
+import { InfoPageLayout, FxCodeEditor, BoardDrawer} from "@/fx/ui"
 
 import Head from 'next/head'
 import Comments from "@/react/comments"

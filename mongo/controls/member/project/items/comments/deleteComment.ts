@@ -11,7 +11,7 @@ import Comment from '@/mongo/schemas/CommentSchema'
 import SectionType from '@/mongo/schemas/SectionTypeSchema'
 import Section from '@/mongo/schemas/SectionSchema'
 import Member from '@/mongo/schemas/MemberSchema'
-import {PermissionCodes, permission} from 'fx/ui/PermissionComponent'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 
 export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) => {
   const {projectId, itemId, commentId} = req.query

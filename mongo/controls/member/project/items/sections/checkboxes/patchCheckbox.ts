@@ -10,7 +10,7 @@ import Item from '@/mongo/schemas/ItemSchema'
 import Section from '@/mongo/schemas/SectionSchema'
 import SectionType from '@/mongo/schemas/SectionTypeSchema'
 import Checkbox from '@/mongo/schemas/CheckboxSchema'
-import {PermissionCodes, permission} from 'fx/ui/PermissionComponent'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 import {SectionTypes} from '@/react/section'
 
 export const patchCheckbox = async (req: NextApiRequest, res: NextApiResponse) => {

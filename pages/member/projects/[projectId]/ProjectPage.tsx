@@ -15,7 +15,7 @@ import { Member, MemberContext } from "@/react/members"
 import { Board } from "@/react/board"
 
 import { InfoPageLayout, PermissionCodes, permission } from "@/fx/ui"
-import { unAuthRedirect } from "error"
+import { unAuthRedirect } from "@/error"
 
 export type ProjectPage = {
   project: Project;

@@ -7,13 +7,13 @@ import Checkbox from '@/mongo/schemas/CheckboxSchema'
 import axios from 'axios'
 import mongoose from 'mongoose'
 
-import Item from 'mongo/schemas/ItemSchema'
+import Item from '@/mongo/schemas/ItemSchema'
 import {Item as ItemInterface} from '@/react/item'
 import Section from '@/mongo/schemas/SectionSchema'
 
 import SectionType from '@/mongo/schemas/SectionTypeSchema'
 
-import {PermissionCodes, permission} from 'fx/ui/PermissionComponent'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 
 import {findItem} from '@/mongo/controls/member/project/items/findItem'
 

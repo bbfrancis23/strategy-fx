@@ -14,7 +14,7 @@ import { WebsiteBoards } from "@/react/app/"
 import { Column } from "@/react/column/"
 import { Item, getCardDirectory } from "@/react/item"
 
-import { WEBSITE_PROJECT_ID} from "pages/HomePage"
+import { WEBSITE_PROJECT_ID} from "@/pages/HomePage"
 import { FxThemeContext } from "@/fx/theme"
 import { HoverLink, ListCard } from "@/fx/ui"
 import { findProjectBoards } from "@/mongo/controls/project/projectControls"
