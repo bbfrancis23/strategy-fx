@@ -5,7 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline"
 import { SnackbarOrigin, SnackbarProvider, SnackbarProviderProps } from "notistack"
 import { ConfirmProvider } from "material-ui-confirm"
 import { FxTheme, FxThemeContext, FxThemeNames, UpdateThemeOptionsProps, createFxTheme,
-  defaultFxTheme, fxThemeOptionsList } from "fx/theme"
+  defaultFxTheme, fxThemeOptionsList } from "@/fx/theme"
 
 export interface AppCompoentProps {
   children: JSX.Element | JSX.Element []

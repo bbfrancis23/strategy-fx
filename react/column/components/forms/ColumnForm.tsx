@@ -12,7 +12,7 @@ import { ProjectContext } from '@/react/project/'
 import { MemberContext } from '@/react/members'
 import { BoardContext } from '@/react/board/BoardContext'
 import {Permission, PermissionCodes, NoPermission,
-  SaveButton, SaveButtonProps, FormActions } from 'fx/ui'
+  SaveButton, SaveButtonProps, FormActions } from '@/fx/ui'
 import { FxThemeContext } from '@/fx/theme'
 
 interface ColumnFormProps { column: Column}

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -9,23 +9,23 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/react/*": ["react/*"],
-      "@/pages/*": ["pages/*"],
-      "@/interfaces/*": ["interfaces/*"],
-      "@/mongo/*": ["mongo/*"],
-      "@/controls/*": ["mongo/controls/*"],
-      "@/ui/*": ["ui/*"],
-      "@/fx/*": ["fx/*"],
-      "@/error": ["error"],
-      "@/itemComponents/*": ["components/members/projects/boards/columns/items/*"]
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/react/*": ["./react/*"],
+      "@/pages/*": ["./pages/*"],
+      "@/interfaces/*": ["./interfaces/*"],
+      "@/mongo/*": ["./mongo/*"],
+      "@/controls/*": ["./mongo/controls/*"],
+      "@/ui/*": ["./ui/*"],
+      "@/fx/*": ["./fx/*"],
+      "@/error": ["./error"],
+      "@/itemComponents/*": ["./components/members/projects/boards/columns/items/*"]
     }
   },
   "include": [

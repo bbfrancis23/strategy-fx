@@ -4,7 +4,7 @@ import { useSnackbar } from "notistack"
 
 import { Comment } from "@/react/comments"
 import { ProjectMemberAvatar } from "@/react/members"
-import {Permission, NoPermission, PermissionCodes, PermissionProps} from "fx/ui"
+import {Permission, NoPermission, PermissionCodes, PermissionProps} from "@/fx/ui"
 import { FxCodeEditor } from "@/fx/ui"
 import CodeCommentForm from "./forms/CodeCommentForm"
 import { TextareaCodeEditorProps } from "@uiw/react-textarea-code-editor"

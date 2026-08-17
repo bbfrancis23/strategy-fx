@@ -8,7 +8,7 @@ import { Column } from "@/react/column"
 import { ProjectContext } from "@/react/project"
 import { MemberContext } from "@/react/members"
 import { BoardContext } from "@/react/board"
-import {Permission, PermissionCodes } from "fx/ui"
+import {Permission, PermissionCodes } from "@/fx/ui"
 import AssessmentSortButton from "./AssessmentSortButton"
 
 export interface ColMenuProps { column: Column}

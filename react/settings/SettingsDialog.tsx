@@ -9,7 +9,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode"
 import LightModeIcon from "@mui/icons-material/LightMode"
 import SettingsPalettes from "./SettingsPalettes"
 import {DraggableDialog} from "@/fx/ui"
-import { FxThemeContext, FxThemeOptions, createFxTheme, fxThemeOptionsList } from "fx/theme"
+import { FxThemeContext, FxThemeOptions, createFxTheme, fxThemeOptionsList } from "@/fx/theme"
 import { DialogActions as AppDialogActions, AppDialogs } from "@/react/app/app-types"
 import { AppContext } from "@/react/app"
 

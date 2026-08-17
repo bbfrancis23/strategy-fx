@@ -10,7 +10,7 @@ import { Member, ProjectMemberAvatar } from "@/react/members"
 import { ProjectContext } from "@/react/project"
 import { BoardTitleForm, BoardOptionsMenu, BoardContext, Board} from "@/react/board"
 import {Scope} from "@/react/scope"
-import { PermissionCodes } from "fx/ui"
+import { PermissionCodes } from "@/fx/ui"
 
 const BoardToolbarContainer = styled(Box)(({ theme }) => ({
   display: 'flex',

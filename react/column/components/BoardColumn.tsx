@@ -6,7 +6,7 @@ import { MemberContext } from "@/react/members"
 import { ProjectContext } from "@/react/project/"
 import {CreateItemForm} from "@/react/item"
 
-import {Permission, PermissionCodes } from "fx/ui"
+import {Permission, PermissionCodes } from "@/fx/ui"
 export interface BoardColumnProps {
   index: number
   column: Column

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Box, Stack, Typography } from "@mui/material"
 import { ProjectMemberAvatar } from "@/react/members"
-import {Permission, NoPermission, PermissionCodes, PermissionProps } from "fx/ui"
+import {Permission, NoPermission, PermissionCodes, PermissionProps } from "@/fx/ui"
 import { Comment } from "../comment-types"
 import TextCommentForm from "./forms/TextCommentForm"
 

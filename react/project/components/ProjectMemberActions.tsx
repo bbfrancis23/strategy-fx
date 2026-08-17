@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack"
 import axios from "axios"
 import { Member } from "@/react/members"
 import { ProjectContext } from "@/react/project"
-import {Permission, PermissionCodes } from "fx/ui"
+import {Permission, PermissionCodes } from "@/fx/ui"
 export interface ProjectMemberActionsProps{
   member: Member;
   type: PermissionCodes;

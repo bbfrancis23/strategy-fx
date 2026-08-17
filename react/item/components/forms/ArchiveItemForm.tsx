@@ -6,7 +6,7 @@ import axios from "axios"
 import { useConfirm } from "material-ui-confirm"
 import { MemberContext } from "@/react/members"
 import { ProjectContext } from "@/react/project"
-import {Permission, PermissionCodes } from "fx/ui"
+import {Permission, PermissionCodes } from "@/fx/ui"
 import { useSnackbar } from "notistack"
 import { ItemContext } from "@/react/item/ItemContext"
 

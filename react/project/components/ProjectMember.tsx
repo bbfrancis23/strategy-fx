@@ -5,7 +5,7 @@ import { SxProps } from "@mui/material/styles"
 import LeaderBadge from '@mui/icons-material/Star'
 import AdminBadge from '@mui/icons-material/Shield'
 import { Member } from "@/react/members"
-import {Permission, PermissionCodes, NoPermission } from "fx/ui"
+import {Permission, PermissionCodes, NoPermission } from "@/fx/ui"
 import { ProjectContext, ProjectMemberActions } from "@/react/project"
 export interface ProjectMemberProps {
   type: PermissionCodes

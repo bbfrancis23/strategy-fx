@@ -3,7 +3,7 @@ import LeaderBadgeIcon from '@mui/icons-material/Star'
 import AdminBadge from '@mui/icons-material/Shield'
 
 import { Member } from "@/react/members"
-import { PermissionCodes } from "fx/ui"
+import { PermissionCodes } from "@/fx/ui"
 export interface ProjectMemberAvatarProps {
   type: PermissionCodes,
   member: Member,
