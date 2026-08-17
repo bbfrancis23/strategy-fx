@@ -1,3 +1,4 @@
+require('node:dns/promises').setServers(['1.1.1.1', '8.8.8.8'])
 import mongoose from 'mongoose'
 
 const connection = {}
