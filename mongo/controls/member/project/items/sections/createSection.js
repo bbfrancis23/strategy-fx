@@ -1,16 +1,16 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 import {ObjectId} from 'mongodb'
 import {getServerSession} from 'next-auth/next'
 import {authOptions} from '@/pages/api/auth/[...nextauth]'
 import axios from 'axios'
 import mongoose from 'mongoose'
 
-import Item from 'mongo/schemas/ItemSchema'
-import Section from '/mongo/schemas/SectionSchema'
+import Item from '@/mongo/schemas/ItemSchema'
+import Section from '@/mongo/schemas/SectionSchema'
 
 import {findItem} from '../findItem'
 
-import {PermissionCodes, permission} from '/fx/ui/PermissionComponent'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 
 export const createSection = async (req, res) => {
   const {sectiontype, content} = req.body

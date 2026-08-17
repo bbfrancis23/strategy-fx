@@ -1,12 +1,12 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 
-import Board from '/mongo/schemas/BoardSchema'
+import Board from '@/mongo/schemas/BoardSchema'
 
-import Column from '/mongo/schemas/ColumnSchema'
-import Item from '/mongo/schemas/ItemSchema'
+import Column from '@/mongo/schemas/ColumnSchema'
+import Item from '@/mongo/schemas/ItemSchema'
 
-import Section from '/mongo/schemas/SectionSchema'
-import Checkbox from '/mongo/schemas/CheckboxSchema'
+import Section from '@/mongo/schemas/SectionSchema'
+import Checkbox from '@/mongo/schemas/CheckboxSchema'
 
 export const findPublicBoard = async (id) => {
   let board = undefined

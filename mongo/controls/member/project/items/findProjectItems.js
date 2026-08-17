@@ -1,12 +1,12 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 
-import Board from '/mongo/schemas/BoardSchema'
-// import Project from '/mongo/schemas/ProjectSchema';
+import Board from '@/mongo/schemas/BoardSchema'
+// import Project from '@/mongo/schemas/ProjectSchema';
 
-import Column from '/mongo/schemas/ColumnSchema'
-import Item from '/mongo/schemas/ItemSchema'
+import Column from '@/mongo/schemas/ColumnSchema'
+import Item from '@/mongo/schemas/ItemSchema'
 
-import Section from '/mongo/schemas/SectionSchema'
+import Section from '@/mongo/schemas/SectionSchema'
 
 export const findProjectItems = async (projectId) => {
   let items = []

@@ -1,6 +1,6 @@
-import db from '/mongo/db'
-import Item from '/mongo/schemas/ItemSchema'
-import Section from '/mongo/schemas/SectionSchema'
+import db from '@/mongo/db'
+import Item from '@/mongo/schemas/ItemSchema'
+import Section from '@/mongo/schemas/SectionSchema'
 
 const processVote = async (item, vote, userId) => {
   item.upvotes = await item.upvotes.filter((v) => v !== userId)

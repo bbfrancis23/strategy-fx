@@ -1,7 +1,7 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 
-import Item from 'mongo/schemas/ItemSchema'
-import Section from '/mongo/schemas/SectionSchema'
+import Item from '@/mongo/schemas/ItemSchema'
+import Section from '@/mongo/schemas/SectionSchema'
 
 import {ObjectId} from 'mongodb'
 

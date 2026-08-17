@@ -1,5 +1,5 @@
-import db from '/mongo/db'
-import Member from '/mongo/schemas/MemberSchema'
+import db from '@/mongo/db'
+import Member from '@/mongo/schemas/MemberSchema'
 
 export const handler = (req, res) => {
   // const {itemId} = req.query

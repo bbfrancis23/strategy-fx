@@ -1,10 +1,10 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 import {getServerSession} from 'next-auth/next'
 import {authOptions} from '@/pages/api/auth/[...nextauth]'
 import mongoose from 'mongoose'
 
-import Project from '/mongo/schemas/ProjectSchema'
-import Board from '/mongo/schemas/BoardSchema'
+import Project from '@/mongo/schemas/ProjectSchema'
+import Board from '@/mongo/schemas/BoardSchema'
 
 import Column from '/mongo/schemas/ColumnSchema'
 

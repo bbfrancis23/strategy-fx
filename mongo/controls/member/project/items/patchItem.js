@@ -1,14 +1,14 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 import {ObjectId} from 'mongodb'
 import {getServerSession} from 'next-auth/next'
 import {authOptions} from '@/pages/api/auth/[...nextauth]'
 import axios from 'axios'
 
-import Item from '/mongo/schemas/ItemSchema'
-import Section from '/mongo/schemas/SectionSchema'
-import Project from '/mongo/schemas/ProjectSchema'
+import Item from '@/mongo/schemas/ItemSchema'
+import Section from '@/mongo/schemas/SectionSchema'
+import Project from '@/mongo/schemas/ProjectSchema'
 
-import {PermissionCodes, permission} from 'fx/ui/PermissionComponent'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 import {findItem} from './findItem'
 
 export const patchItem = async (req, res) => {

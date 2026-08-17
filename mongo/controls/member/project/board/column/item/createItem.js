@@ -1,18 +1,18 @@
 import axios from 'axios'
-import db from '/mongo/db'
+import db from '@/mongo/db'
 
-import Project from '/mongo/schemas/ProjectSchema'
-import Board from '/mongo/schemas/BoardSchema'
-import Column from '/mongo/schemas/ColumnSchema'
-import Item from '/mongo/schemas/ItemSchema'
-import Member from '/mongo/schemas/MemberSchema'
+import Project from '@/mongo/schemas/ProjectSchema'
+import Board from '@/mongo/schemas/BoardSchema'
+import Column from '@/mongo/schemas/ColumnSchema'
+import Item from '@/mongo/schemas/ItemSchema'
+import Member from '@/mongo/schemas/MemberSchema'
 
 import {getServerSession} from 'next-auth/next'
 import {authOptions} from '@/pages/api/auth/[...nextauth]'
 
-import {PermissionCodes, permission} from 'fx/ui/PermissionComponent'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 
-import findPublicBoard from '../../findPublicBoard'
+import findPublicBoard from '@/mongo/controls/member/project/board/findPublicBoard'
 
 import mongoose from 'mongoose'
 

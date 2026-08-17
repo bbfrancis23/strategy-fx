@@ -1,4 +1,4 @@
-import {createColumn} from '/mongo/controls/member/project/board/column/createColumn'
+import {createColumn} from '@/mongo/controls/member/project/board/column/createColumn'
 
 const handler = async (req, res) => {
   if (req.method === 'POST') {

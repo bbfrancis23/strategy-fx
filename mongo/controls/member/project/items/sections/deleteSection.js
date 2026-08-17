@@ -1,17 +1,17 @@
-import db from '/mongo/db'
+import db from '@/mongo/db'
 import {ObjectId} from 'mongodb'
 import {getServerSession} from 'next-auth/next'
 import {authOptions} from '@/pages/api/auth/[...nextauth]'
 import axios from 'axios'
 import mongoose from 'mongoose'
 
-import Item from 'mongo/schemas/ItemSchema'
-import Section from '/mongo/schemas/SectionSchema'
+import Item from '@/mongo/schemas/ItemSchema'
+import Section from '@/mongo/schemas/SectionSchema'
 
-import SectionType from '/mongo/schemas/SectionTypeSchema'
+import SectionType from '@/mongo/schemas/SectionTypeSchema'
 
-import {PermissionCodes, permission} from 'fx/ui/PermissionComponent'
-import {findItem} from '/mongo/controls/member/project/items/findItem'
+import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
+import {findItem} from '@/mongo/controls/member/project/items/findItem'
 
 export const deleteSection = async (req, res) => {
   console.log('deleting section ')
