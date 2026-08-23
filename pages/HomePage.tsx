@@ -80,30 +80,42 @@ const CoverImg = ({src, alt, sizes, priority}: CoverImgProps) => (
     style={{ objectFit: 'cover' }} />
 )
 
-const HeroCollageSx = { mt: 5, mx: 'auto', maxWidth: '900px', textAlign: 'left',
-  border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden',
-  boxShadow: 4, bgcolor: 'divider', display: 'grid', gap: '4px', aspectRatio: '16 / 9',
-  gridTemplateColumns: '2fr 1fr', gridTemplateRows: '1fr 1fr',
-  gridTemplateAreas: '"main top" "main bottom"' }
+const SCREENSHOT_RATIO = '1917 / 905'
 
-const collageTileSx = (area: string) => ({ gridArea: area, position: 'relative' })
+const HeroCollageSx = { mt: 6, mb: 2, mx: 'auto', maxWidth: '820px', position: 'relative',
+  aspectRatio: '16 / 11' }
+
+interface CollageCardPlacement {
+  top: string
+  left: string
+  width: string
+  rotate: number
+  z: number
+}
+
+const collageCardSx = ({top, left, width, rotate, z}: CollageCardPlacement) => ({
+  position: 'absolute', top, left, width, aspectRatio: SCREENSHOT_RATIO,
+  transform: `rotate(${rotate}deg)`, zIndex: z, bgcolor: 'background.paper',
+  border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden',
+  boxShadow: z === 3 ? 8 : 3,
+})
 
 const HeroCollage = () => (
   <Box sx={HeroCollageSx}>
-    <Box sx={collageTileSx('main')}>
-      <CoverImg src={'/images/marketing/Team-Page.png'} priority
-        sizes={'(max-width: 900px) 66vw, 600px'}
-        alt={'Strategy Fx card detail dialog with a code snippet, checklist and comments'} />
+    <Box sx={collageCardSx({top: '0%', left: '2%', width: '62%', rotate: -6, z: 1})}>
+      <CoverImg src={'/images/marketing/Strategy-Board.png'}
+        sizes={'(max-width: 820px) 62vw, 500px'}
+        alt={'A Strategies board with Standards, Best Practices and Philosophies columns'} />
     </Box>
-    <Box sx={collageTileSx('top')}>
+    <Box sx={collageCardSx({top: '24%', left: '36%', width: '62%', rotate: 5, z: 2})}>
       <CoverImg src={'/images/marketing/Workout-Board.png'}
-        sizes={'(max-width: 900px) 33vw, 300px'}
+        sizes={'(max-width: 820px) 62vw, 500px'}
         alt={'A workout board tracking isolation exercises by muscle group'} />
     </Box>
-    <Box sx={collageTileSx('bottom')}>
-      <CoverImg src={'/images/marketing/Board-Page.png'}
-        sizes={'(max-width: 900px) 33vw, 300px'}
-        alt={'A board using the Ocean background theme'} />
+    <Box sx={collageCardSx({top: '12%', left: '19%', width: '64%', rotate: 0, z: 3})}>
+      <CoverImg src={'/images/marketing/Standards-Item.png'} priority
+        sizes={'(max-width: 820px) 64vw, 520px'}
+        alt={'A card detail dialog showing a React useReducer code example'} />
     </Box>
   </Box>
 )
@@ -136,8 +148,8 @@ const Hero = ({onSignIn}: {onSignIn: () => void}) => (
 interface GalleryImage { src: string; alt: string; caption: string }
 
 const GALLERY: GalleryImage[] = [
-  { src: '/images/marketing/Screenshot%202023-08-28%20203738.png',
-    alt: 'A JavaScript best-practices board with three columns of cards',
+  { src: '/images/marketing/Best-Practice.png',
+    alt: 'A React card detail page documenting the useReducer hook',
     caption: 'Boards for anything, not just code' },
   { src: '/images/marketing/Member-Page.png',
     alt: 'A member dashboard listing their projects',
@@ -147,7 +159,7 @@ const GALLERY: GalleryImage[] = [
     caption: 'Project & team management' },
 ]
 
-const GalleryTileSx = { position: 'relative', aspectRatio: '4 / 3', border: '1px solid',
+const GalleryTileSx = { position: 'relative', aspectRatio: SCREENSHOT_RATIO, border: '1px solid',
   borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }
 const GallerySizes = '(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw'
 
