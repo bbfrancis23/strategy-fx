@@ -15,17 +15,15 @@ import LockIcon from "@mui/icons-material/Lock"
 import { AppFooter, AppContext, AppDialogs, DialogActions } from "@/react/app"
 import { FxThemeContext } from "@/fx/theme"
 import { SCREENSHOT_RATIO, CoverImg, GalleryImage, GALLERY, GalleryCard, Lightbox }
-  from "./HomePageGallery"
+  from "@/react/app/components/HomePageGallery"
 
-const GITHUB_URL = "https://github.com/bbfrancis23/aqua-dogs"
+const GITHUB_URL = "https://github.com/bbfrancis23/strategy-fx"
 
 const DESCRIPTION = "Strategy Fx is a full-stack board and project management app, built solo "
   + "end-to-end with Next.js, TypeScript, MongoDB and Material UI as a portfolio project."
 const KEYWORDS = "Portfolio Project, Kanban Board, Next.js, TypeScript, React, "
   + "MongoDB, Mongoose, Material UI, MUI, NextAuth, Full Stack Developer, Software Engineer, "
   + "Web Application, Drag and Drop, Project Management"
-
-export const WEBSITE_PROJECT_ID: string = '64b6bc0a1b836981ba0c4cc5'
 
 interface Feature { icon: JSX.Element; title: string; body: string }
 
