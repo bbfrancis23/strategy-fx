@@ -72,9 +72,41 @@ const FeatureCard = ({icon, title, body}: Feature) => (
 const HeroTitleSx = { fontSize: {xs: '2.5rem', sm: '3.5rem'}, fontWeight: 700 }
 const HeroSubtitleSx = { fontSize: {xs: '1.1rem', sm: '1.35rem'}, fontWeight: 400,
   color: 'text.secondary', mt: 2 }
-const HeroScreenshotSx = { mt: 5, mx: 'auto', maxWidth: '900px', textAlign: 'left',
+
+interface CoverImgProps { src: string; alt: string; sizes: string; priority?: boolean }
+
+const CoverImg = ({src, alt, sizes, priority}: CoverImgProps) => (
+  <Image src={src} alt={alt} fill sizes={sizes} priority={priority}
+    style={{ objectFit: 'cover' }} />
+)
+
+const HeroCollageSx = { mt: 5, mx: 'auto', maxWidth: '900px', textAlign: 'left',
   border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden',
-  boxShadow: 4 }
+  boxShadow: 4, bgcolor: 'divider', display: 'grid', gap: '4px', aspectRatio: '16 / 9',
+  gridTemplateColumns: '2fr 1fr', gridTemplateRows: '1fr 1fr',
+  gridTemplateAreas: '"main top" "main bottom"' }
+
+const collageTileSx = (area: string) => ({ gridArea: area, position: 'relative' })
+
+const HeroCollage = () => (
+  <Box sx={HeroCollageSx}>
+    <Box sx={collageTileSx('main')}>
+      <CoverImg src={'/images/marketing/Team-Page.png'} priority
+        sizes={'(max-width: 900px) 66vw, 600px'}
+        alt={'Strategy Fx card detail dialog with a code snippet, checklist and comments'} />
+    </Box>
+    <Box sx={collageTileSx('top')}>
+      <CoverImg src={'/images/marketing/Workout-Board.png'}
+        sizes={'(max-width: 900px) 33vw, 300px'}
+        alt={'A workout board tracking isolation exercises by muscle group'} />
+    </Box>
+    <Box sx={collageTileSx('bottom')}>
+      <CoverImg src={'/images/marketing/Board-Page.png'}
+        sizes={'(max-width: 900px) 33vw, 300px'}
+        alt={'A board using the Ocean background theme'} />
+    </Box>
+  </Box>
+)
 
 const Hero = ({onSignIn}: {onSignIn: () => void}) => (
   <Box sx={{ py: {xs: 6, sm: 10}, textAlign: 'center', bgcolor: 'secondary.main',
@@ -97,48 +129,32 @@ const Hero = ({onSignIn}: {onSignIn: () => void}) => (
         </Button>
       </Stack>
     </Box>
-    <Box sx={HeroScreenshotSx}>
-      <Image src={'/images/marketing/Team-Page.png'} width={1913} height={869}
-        style={{ width: '100%', height: 'auto', display: 'block' }} priority
-        alt={'Strategy Fx card detail dialog with a code snippet, checklist and comments'} />
-    </Box>
+    <HeroCollage />
   </Box>
 )
 
-interface GalleryImage {
-  src: string
-  alt: string
-  caption: string
-  width: number
-  height: number
-}
+interface GalleryImage { src: string; alt: string; caption: string }
 
 const GALLERY: GalleryImage[] = [
   { src: '/images/marketing/Screenshot%202023-08-28%20203738.png',
     alt: 'A JavaScript best-practices board with three columns of cards',
-    caption: 'Boards for anything, not just code', width: 864, height: 766 },
-  { src: '/images/marketing/Board-Page.png',
-    alt: 'A board using the Ocean background theme',
-    caption: 'Switchable board themes', width: 1171, height: 738 },
-  { src: '/images/marketing/Workout-Board.png',
-    alt: 'A workout board tracking isolation exercises by muscle group',
-    caption: 'Flexible enough for a workout tracker', width: 1902, height: 873 },
+    caption: 'Boards for anything, not just code' },
   { src: '/images/marketing/Member-Page.png',
-    alt: 'A member dashboard listing their projects', caption: 'Member dashboard',
-    width: 1122, height: 619 },
+    alt: 'A member dashboard listing their projects',
+    caption: 'Member dashboard' },
   { src: '/images/marketing/Member-Project-Page.png',
     alt: 'A project page listing its members and boards',
-    caption: 'Project & team management', width: 869, height: 834 },
+    caption: 'Project & team management' },
 ]
 
-const GalleryCardImgSx = { border: '1px solid', borderColor: 'divider', borderRadius: 2,
-  overflow: 'hidden' }
+const GalleryTileSx = { position: 'relative', aspectRatio: '4 / 3', border: '1px solid',
+  borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }
+const GallerySizes = '(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw'
 
-const GalleryCard = ({src, alt, caption, width, height}: GalleryImage) => (
+const GalleryCard = ({src, alt, caption}: GalleryImage) => (
   <Grid item xs={12} sm={6} md={4}>
-    <Box sx={GalleryCardImgSx}>
-      <Image src={src} alt={alt} width={width} height={height}
-        style={{ width: '100%', height: 'auto', display: 'block' }} />
+    <Box sx={GalleryTileSx}>
+      <CoverImg src={src} alt={alt} sizes={GallerySizes} />
     </Box>
     <Typography variant={'body2'} color={'text.secondary'} sx={{ mt: 1 }}>{caption}</Typography>
   </Grid>
