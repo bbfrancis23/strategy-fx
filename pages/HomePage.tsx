@@ -18,10 +18,9 @@ import { FxThemeContext } from "@/fx/theme"
 
 const GITHUB_URL = "https://github.com/bbfrancis23/aqua-dogs"
 
-const DESCRIPTION = "Strategy Fx is a full-stack, Trello-style board and project management app, "
-  + "built solo end-to-end with Next.js, TypeScript, MongoDB and Material UI as a portfolio "
-  + "project."
-const KEYWORDS = "Portfolio Project, Trello Clone, Kanban Board, Next.js, TypeScript, React, "
+const DESCRIPTION = "Strategy Fx is a full-stack board and project management app, built solo "
+  + "end-to-end with Next.js, TypeScript, MongoDB and Material UI as a portfolio project."
+const KEYWORDS = "Portfolio Project, Kanban Board, Next.js, TypeScript, React, "
   + "MongoDB, Mongoose, Material UI, MUI, NextAuth, Full Stack Developer, Software Engineer, "
   + "Web Application, Drag and Drop, Project Management"
 
@@ -105,7 +104,7 @@ const HeroCollage = () => (
     <Box sx={collageCardSx({top: '0%', left: '2%', width: '62%', rotate: -6, z: 1})}>
       <CoverImg src={'/images/marketing/Strategy-Board.png'}
         sizes={'(max-width: 820px) 62vw, 500px'}
-        alt={'A Strategies board with Standards, Best Practices and Philosophies columns'} />
+        alt={'A React board with a Custom Hook card dialog open, showing example hook code'} />
     </Box>
     <Box sx={collageCardSx({top: '24%', left: '36%', width: '62%', rotate: 5, z: 2})}>
       <CoverImg src={'/images/marketing/Workout-Board.png'}
@@ -115,7 +114,8 @@ const HeroCollage = () => (
     <Box sx={collageCardSx({top: '12%', left: '19%', width: '64%', rotate: 0, z: 3})}>
       <CoverImg src={'/images/marketing/Standards-Item.png'} priority
         sizes={'(max-width: 820px) 64vw, 520px'}
-        alt={'A card detail dialog showing a React useReducer code example'} />
+        alt={'A Strategies board with a MUI Theme Colors card dialog open, showing '
+          + 'theme palette code'} />
     </Box>
   </Box>
 )
@@ -127,8 +127,8 @@ const Hero = ({onSignIn}: {onSignIn: () => void}) => (
       <Typography variant={'overline'} color={'text.secondary'}>Portfolio Project</Typography>
       <Typography variant={'h1'} sx={HeroTitleSx}>Strategy Fx</Typography>
       <Typography variant={'h2'} sx={HeroSubtitleSx}>
-        A Trello-style board and project management app, built solo from the database up
-        &mdash; a case study in full-stack product engineering, not just a UI clone.
+        A board and project management app, built solo from the database up
+        &mdash; a case study in full-stack product engineering, not just a UI exercise.
       </Typography>
       <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} justifyContent={'center'}
         sx={{ mt: 4 }}>
@@ -148,9 +148,19 @@ const Hero = ({onSignIn}: {onSignIn: () => void}) => (
 interface GalleryImage { src: string; alt: string; caption: string }
 
 const GALLERY: GalleryImage[] = [
+  { src: '/images/marketing/Strategy-Board.png',
+    alt: 'A React board with a Custom Hook card dialog open, showing example hook code',
+    caption: 'Card detail with code snippets' },
+  { src: '/images/marketing/Standards-Item.png',
+    alt: 'A Strategies board with a MUI Theme Colors card dialog open, showing theme '
+      + 'palette code',
+    caption: 'Switchable board themes' },
+  { src: '/images/marketing/Workout-Board.png',
+    alt: 'A workout board tracking isolation exercises by muscle group',
+    caption: 'Flexible enough for a workout tracker' },
   { src: '/images/marketing/Best-Practice.png',
-    alt: 'A React card detail page documenting the useReducer hook',
-    caption: 'Boards for anything, not just code' },
+    alt: 'A React documentation page explaining the useReducer hook',
+    caption: 'In-depth documentation pages' },
   { src: '/images/marketing/Member-Page.png',
     alt: 'A member dashboard listing their projects',
     caption: 'Member dashboard' },
@@ -182,7 +192,7 @@ const Page = () => {
   return (
     <>
       <Head>
-        <title>Strategy Fx - A Trello-style Board App, Built as a Portfolio Project</title>
+        <title>Strategy Fx - A Board & Project Management App, Built as a Portfolio Project</title>
         <meta name="description" content={DESCRIPTION} />
         <meta name="keywords" content={KEYWORDS} />
       </Head>
