@@ -1,5 +1,6 @@
 import { useContext } from "react"
 import Head from 'next/head'
+import Image from "next/image"
 import { Box, Grid, Typography, Button, Chip, Stack } from "@mui/material"
 import GitHubIcon from "@mui/icons-material/GitHub"
 import LoginIcon from "@mui/icons-material/Login"
@@ -71,6 +72,9 @@ const FeatureCard = ({icon, title, body}: Feature) => (
 const HeroTitleSx = { fontSize: {xs: '2.5rem', sm: '3.5rem'}, fontWeight: 700 }
 const HeroSubtitleSx = { fontSize: {xs: '1.1rem', sm: '1.35rem'}, fontWeight: 400,
   color: 'text.secondary', mt: 2 }
+const HeroScreenshotSx = { mt: 5, mx: 'auto', maxWidth: '900px', textAlign: 'left',
+  border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden',
+  boxShadow: 4 }
 
 const Hero = ({onSignIn}: {onSignIn: () => void}) => (
   <Box sx={{ py: {xs: 6, sm: 10}, textAlign: 'center', bgcolor: 'secondary.main',
@@ -93,7 +97,51 @@ const Hero = ({onSignIn}: {onSignIn: () => void}) => (
         </Button>
       </Stack>
     </Box>
+    <Box sx={HeroScreenshotSx}>
+      <Image src={'/images/marketing/Team-Page.png'} width={1913} height={869}
+        style={{ width: '100%', height: 'auto', display: 'block' }} priority
+        alt={'Strategy Fx card detail dialog with a code snippet, checklist and comments'} />
+    </Box>
   </Box>
+)
+
+interface GalleryImage {
+  src: string
+  alt: string
+  caption: string
+  width: number
+  height: number
+}
+
+const GALLERY: GalleryImage[] = [
+  { src: '/images/marketing/Screenshot%202023-08-28%20203738.png',
+    alt: 'A JavaScript best-practices board with three columns of cards',
+    caption: 'Boards for anything, not just code', width: 864, height: 766 },
+  { src: '/images/marketing/Board-Page.png',
+    alt: 'A board using the Ocean background theme',
+    caption: 'Switchable board themes', width: 1171, height: 738 },
+  { src: '/images/marketing/Workout-Board.png',
+    alt: 'A workout board tracking isolation exercises by muscle group',
+    caption: 'Flexible enough for a workout tracker', width: 1902, height: 873 },
+  { src: '/images/marketing/Member-Page.png',
+    alt: 'A member dashboard listing their projects', caption: 'Member dashboard',
+    width: 1122, height: 619 },
+  { src: '/images/marketing/Member-Project-Page.png',
+    alt: 'A project page listing its members and boards',
+    caption: 'Project & team management', width: 869, height: 834 },
+]
+
+const GalleryCardImgSx = { border: '1px solid', borderColor: 'divider', borderRadius: 2,
+  overflow: 'hidden' }
+
+const GalleryCard = ({src, alt, caption, width, height}: GalleryImage) => (
+  <Grid item xs={12} sm={6} md={4}>
+    <Box sx={GalleryCardImgSx}>
+      <Image src={src} alt={alt} width={width} height={height}
+        style={{ width: '100%', height: 'auto', display: 'block' }} />
+    </Box>
+    <Typography variant={'body2'} color={'text.secondary'} sx={{ mt: 1 }}>{caption}</Typography>
+  </Grid>
 )
 
 const Page = () => {
@@ -134,6 +182,17 @@ const Page = () => {
           sx={{ maxWidth: '700px', mx: 'auto', gap: 1 }}>
           { STACK.map((s) => <Chip key={s} label={s} variant={'outlined'} />) }
         </Stack>
+      </Box>
+
+      {/* Gallery */}
+      <Box sx={{ p: fx.theme.defaultPadding, py: {xs: 5, sm: 7} }}>
+        <Typography variant={'h2'} sx={{ fontSize: '1.75rem', fontWeight: 600,
+          textAlign: 'center', mb: 4 }}>
+          See It In Action
+        </Typography>
+        <Grid container spacing={4} sx={{ maxWidth: '1100px', mx: 'auto' }}>
+          { GALLERY.map((g) => <GalleryCard key={g.src} {...g} />) }
+        </Grid>
       </Box>
 
       {/* About */}
