@@ -1,70 +1,155 @@
 import { useContext } from "react"
-import { GetStaticProps, InferGetServerSidePropsType } from "next"
 import Head from 'next/head'
-import {Grid, Typography, Box} from "@mui/material"
-import { Item, getCardDirectory } from "@/react/item/"
-import { Column } from "@/react/column/"
-import { Board, getBoardDirectory } from "@/react/board/"
-import {AppFooter} from "@/react/app/"
+import { Box, Grid, Typography, Button, Chip, Stack } from "@mui/material"
+import GitHubIcon from "@mui/icons-material/GitHub"
+import LoginIcon from "@mui/icons-material/Login"
+import ViewKanbanIcon from "@mui/icons-material/ViewKanban"
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator"
+import ChecklistIcon from "@mui/icons-material/Checklist"
+import ForumIcon from "@mui/icons-material/Forum"
+import ThumbUpIcon from "@mui/icons-material/ThumbUp"
+import GroupIcon from "@mui/icons-material/Group"
+import PaletteIcon from "@mui/icons-material/Palette"
+import LockIcon from "@mui/icons-material/Lock"
+
+import { AppFooter, AppContext, AppDialogs, DialogActions } from "@/react/app"
 import { FxThemeContext } from "@/fx/theme"
-import { HoverLink, ListCard } from "@/fx/ui"
 
-import { findProjectBoards } from "@/mongo/controls/project/projectControls"
+const GITHUB_URL = "https://github.com/bbfrancis23/aqua-dogs"
 
-const DESCRIPTION = "A Simple way to Orginize your Projects and impliment Strategies. "
-  + "Hundreds of Software Developement Best Practices, Standards and Eamples."
-const KEYWORDS = "JavaScript, TypeScript, React, Next.js, Node.js, MongoDB, Github, Git, "
-  + "HTML, CSS, SCSS, SASS, Material-UI, MUI, Strategy, Project, Organization, Best Practices, "
-  + "VS Code, Software Development, Web Framwork, Web Development, Web App, Web Application,  "
-  + "Mongoose, Express, Material-UI, MUI, Strategy, Project, Organization, Best Practices,  "
-  + "Standards, Examples, Software Development, Web Framwork, Web Development, "
-  + "Web App, Web Application, Full Stack, Full Stack Development, Full Stack Developer, "
-  + "Software Engineer, Software Engineering, Software Developer, Software Development Engineer "
+const DESCRIPTION = "Strategy Fx is a full-stack, Trello-style board and project management app, "
+  + "built solo end-to-end with Next.js, TypeScript, MongoDB and Material UI as a portfolio "
+  + "project."
+const KEYWORDS = "Portfolio Project, Trello Clone, Kanban Board, Next.js, TypeScript, React, "
+  + "MongoDB, Mongoose, Material UI, MUI, NextAuth, Full Stack Developer, Software Engineer, "
+  + "Web Application, Drag and Drop, Project Management"
 
 export const WEBSITE_PROJECT_ID: string = '64b6bc0a1b836981ba0c4cc5'
 
-export interface HomePage{ boards: Board[]}
+interface Feature { icon: JSX.Element; title: string; body: string }
 
-export const getStaticProps: GetStaticProps<HomePage> = async () => {
-  let boards: Board[] = await findProjectBoards(WEBSITE_PROJECT_ID)
-  return {props: { boards}}
-}
+const FEATURES: Feature[] = [
+  { icon: <ViewKanbanIcon fontSize={'large'} color={'primary'} />, title: "Boards & Columns",
+    body: "Create boards, columns and cards with switchable color and background themes." },
+  { icon: <DragIndicatorIcon fontSize={'large'} color={'primary'} />, title: "Drag & Drop",
+    body: "Reorder cards and columns in place, built on react-beautiful-dnd." },
+  { icon: <ChecklistIcon fontSize={'large'} color={'primary'} />, title: "Checklists",
+    body: "Break a card down into checklists with individually tracked items." },
+  { icon: <ForumIcon fontSize={'large'} color={'primary'} />, title: "Comments",
+    body: "Discuss cards with threaded text comments and syntax-highlighted code snippets." },
+  { icon: <ThumbUpIcon fontSize={'large'} color={'primary'} />, title: "Voting & Favorites",
+    body: "Members can vote on and favorite cards to surface what matters most." },
+  { icon: <GroupIcon fontSize={'large'} color={'primary'} />, title: "Projects & Members",
+    body: "Group boards into projects and manage who has access to them." },
+  { icon: <LockIcon fontSize={'large'} color={'primary'} />, title: "Authentication",
+    body: "Email + verification-code sign up alongside Google OAuth, via NextAuth." },
+  { icon: <PaletteIcon fontSize={'large'} color={'primary'} />, title: "Theming",
+    body: "Eight selectable color palettes, in both light and dark mode." },
+]
 
-const Page = ({boards}: InferGetServerSidePropsType<typeof getStaticProps>) => {
+const STACK = [
+  "Next.js",
+  "TypeScript",
+  "React",
+  "MongoDB",
+  "Mongoose",
+  "Material UI",
+  "NextAuth",
+  "Node.js",
+]
+
+const FeatureCard = ({icon, title, body}: Feature) => (
+  <Grid item xs={12} sm={6} md={3}>
+    <Stack spacing={1} sx={{ height: '100%' }}>
+      {icon}
+      <Typography variant={'h3'} sx={{ fontSize: '18px', fontWeight: 600 }}>{title}</Typography>
+      <Typography variant={'body2'} color={'text.secondary'}>{body}</Typography>
+    </Stack>
+  </Grid>
+)
+
+const HeroTitleSx = { fontSize: {xs: '2.5rem', sm: '3.5rem'}, fontWeight: 700 }
+const HeroSubtitleSx = { fontSize: {xs: '1.1rem', sm: '1.35rem'}, fontWeight: 400,
+  color: 'text.secondary', mt: 2 }
+
+const Hero = ({onSignIn}: {onSignIn: () => void}) => (
+  <Box sx={{ py: {xs: 6, sm: 10}, textAlign: 'center', bgcolor: 'secondary.main',
+    borderBottom: '1px solid', borderColor: 'divider' }}>
+    <Box sx={{ maxWidth: '760px', mx: 'auto', px: 3 }}>
+      <Typography variant={'overline'} color={'text.secondary'}>Portfolio Project</Typography>
+      <Typography variant={'h1'} sx={HeroTitleSx}>Strategy Fx</Typography>
+      <Typography variant={'h2'} sx={HeroSubtitleSx}>
+        A Trello-style board and project management app, built solo from the database up
+        &mdash; a case study in full-stack product engineering, not just a UI clone.
+      </Typography>
+      <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} justifyContent={'center'}
+        sx={{ mt: 4 }}>
+        <Button variant={'contained'} size={'large'} startIcon={<GitHubIcon />}
+          href={GITHUB_URL} target={'_blank'} rel={'noopener noreferrer'}>
+          View Source on GitHub
+        </Button>
+        <Button variant={'outlined'} size={'large'} startIcon={<LoginIcon />} onClick={onSignIn}>
+          Sign In & Try It
+        </Button>
+      </Stack>
+    </Box>
+  </Box>
+)
+
+const Page = () => {
 
   const {fxTheme: fx} = useContext(FxThemeContext)
+  const {dialogActions} = useContext(AppContext)
+
+  const openAuthDialog = () => dialogActions({type: DialogActions.Open, dialog: AppDialogs.Auth})
 
   return (
     <>
       <Head>
-        <title>Strategy Fx - Simple Project Strategies and Organization.</title>
+        <title>Strategy Fx - A Trello-style Board App, Built as a Portfolio Project</title>
         <meta name="description" content={DESCRIPTION} />
         <meta name="keywords" content={KEYWORDS} />
       </Head>
-      <Box sx={{ p: fx.theme.defaultPadding}}>
-        <Grid container spacing={fx.theme.defaultPadding}>
-          { boards?.map( (b: Board) => (
-            <Grid item xs={12} md={6} lg={4} key={b.id}>
-              <ListCard title={ b.title } href={getBoardDirectory(b)}>
-                <>
-                  {b?.columns.map( (c: Column) => (
-                    <Box sx={{ pb: 1}} key={c.id}>
-                      <Typography variant={'h3'} sx={{ fontSize: '16px', fontWeight: '500'}} >
-                        {c.title}
-                      </Typography>
-                      { c.items && c?.items.map( (i: Item) => (
-                        <HoverLink key={i.id} href={getCardDirectory(b, i)} title={i.title} />
-                      )) }
-                      { !c.items.length && ( <Typography>Comming soon.</Typography>) }
-                    </ Box>
-                  ))}
-                  { b.columns.length < 1 && ( <Typography>Comming soon.</Typography>) }
-                </>
-              </ListCard>
-            </Grid>
-          ))}
+
+      <Hero onSignIn={openAuthDialog} />
+
+      {/* Features */}
+      <Box sx={{ p: fx.theme.defaultPadding, py: {xs: 5, sm: 7} }}>
+        <Typography variant={'h2'} sx={{ fontSize: '1.75rem', fontWeight: 600,
+          textAlign: 'center', mb: 4 }}>
+          What It Does
+        </Typography>
+        <Grid container spacing={4} sx={{ maxWidth: '1100px', mx: 'auto' }}>
+          { FEATURES.map((f) => <FeatureCard key={f.title} {...f} />) }
         </Grid>
       </Box>
+
+      {/* Stack */}
+      <Box sx={{ py: {xs: 5, sm: 7}, bgcolor: 'secondary.main', borderTop: '1px solid',
+        borderBottom: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+        <Typography variant={'h2'} sx={{ fontSize: '1.75rem', fontWeight: 600, mb: 3 }}>
+          Built With
+        </Typography>
+        <Stack direction={'row'} spacing={1} justifyContent={'center'} flexWrap={'wrap'}
+          sx={{ maxWidth: '700px', mx: 'auto', gap: 1 }}>
+          { STACK.map((s) => <Chip key={s} label={s} variant={'outlined'} />) }
+        </Stack>
+      </Box>
+
+      {/* About */}
+      <Box sx={{ p: fx.theme.defaultPadding, py: {xs: 5, sm: 7}, maxWidth: '760px', mx: 'auto' }}>
+        <Typography variant={'h2'} sx={{ fontSize: '1.75rem', fontWeight: 600, mb: 2 }}>
+          About This Build
+        </Typography>
+        <Typography sx={{ mb: 2 }}>
+          Strategy Fx was designed and built by Brian Francis to work through the hard parts of a
+          real product end-to-end: modeling nested boards/columns/cards/checklists in MongoDB,
+          building a custom email verification-code auth flow alongside Google OAuth, wiring up
+          drag-and-drop state that stays in sync with the server, and theming a Material UI app
+          across eight palettes in light and dark mode.
+        </Typography>
+      </Box>
+
       <AppFooter />
     </>
   )

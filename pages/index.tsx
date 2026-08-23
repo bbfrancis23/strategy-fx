@@ -1,4 +1,3 @@
-import HomePage, {getStaticProps} from "./HomePage"
+import HomePage from "./HomePage"
 
 export default HomePage
-export {getStaticProps}
