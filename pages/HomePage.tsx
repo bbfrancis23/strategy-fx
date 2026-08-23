@@ -1,7 +1,9 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import Head from 'next/head'
 import Image from "next/image"
-import { Box, Grid, Typography, Button, Chip, Stack } from "@mui/material"
+import { Box, Grid, Typography, Button, Chip, Stack, ButtonBase, Dialog, DialogContent,
+  IconButton } from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
 import GitHubIcon from "@mui/icons-material/GitHub"
 import LoginIcon from "@mui/icons-material/Login"
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban"
@@ -170,22 +172,52 @@ const GALLERY: GalleryImage[] = [
 ]
 
 const GalleryTileSx = { position: 'relative', aspectRatio: SCREENSHOT_RATIO, border: '1px solid',
-  borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }
+  borderColor: 'divider', borderRadius: 2, overflow: 'hidden', transition: 'opacity 0.15s',
+  '&:hover': {opacity: 0.85} }
 const GallerySizes = '(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw'
 
-const GalleryCard = ({src, alt, caption}: GalleryImage) => (
+interface GalleryCardProps extends GalleryImage { onOpen: () => void }
+
+const GalleryCard = ({src, alt, caption, onOpen}: GalleryCardProps) => (
   <Grid item xs={12} sm={6} md={4}>
-    <Box sx={GalleryTileSx}>
-      <CoverImg src={src} alt={alt} sizes={GallerySizes} />
-    </Box>
+    <ButtonBase onClick={onOpen} sx={{ display: 'block', width: '100%', borderRadius: 2 }}>
+      <Box sx={GalleryTileSx}>
+        <CoverImg src={src} alt={alt} sizes={GallerySizes} />
+      </Box>
+    </ButtonBase>
     <Typography variant={'body2'} color={'text.secondary'} sx={{ mt: 1 }}>{caption}</Typography>
   </Grid>
+)
+
+const LightboxCloseSx = { position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper',
+  '&:hover': {bgcolor: 'background.paper'} }
+const LightboxImgBoxSx = { position: 'relative', width: '100%', aspectRatio: SCREENSHOT_RATIO }
+
+interface LightboxProps { image: GalleryImage | null; onClose: () => void }
+
+const Lightbox = ({image, onClose}: LightboxProps) => (
+  <Dialog open={Boolean(image)} onClose={onClose} maxWidth={'lg'} fullWidth>
+    { image && (
+      <>
+        <IconButton onClick={onClose} sx={LightboxCloseSx} aria-label={'Close'}>
+          <CloseIcon />
+        </IconButton>
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={LightboxImgBoxSx}>
+            <Image src={image.src} alt={image.alt} fill sizes={'90vw'}
+              style={{ objectFit: 'contain' }} />
+          </Box>
+        </DialogContent>
+      </>
+    ) }
+  </Dialog>
 )
 
 const Page = () => {
 
   const {fxTheme: fx} = useContext(FxThemeContext)
   const {dialogActions} = useContext(AppContext)
+  const [openImage, setOpenImage] = useState<GalleryImage | null>(null)
 
   const openAuthDialog = () => dialogActions({type: DialogActions.Open, dialog: AppDialogs.Auth})
 
@@ -229,9 +261,12 @@ const Page = () => {
           See It In Action
         </Typography>
         <Grid container spacing={4} sx={{ maxWidth: '1100px', mx: 'auto' }}>
-          { GALLERY.map((g) => <GalleryCard key={g.src} {...g} />) }
+          { GALLERY.map((g) => (
+            <GalleryCard key={g.src} {...g} onOpen={() => setOpenImage(g)} />
+          )) }
         </Grid>
       </Box>
+      <Lightbox image={openImage} onClose={() => setOpenImage(null)} />
 
       {/* About */}
       <Box sx={{ p: fx.theme.defaultPadding, py: {xs: 5, sm: 7}, maxWidth: '760px', mx: 'auto' }}>
