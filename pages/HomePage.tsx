@@ -1,9 +1,6 @@
 import { useContext, useState } from "react"
 import Head from 'next/head'
-import Image from "next/image"
-import { Box, Grid, Typography, Button, Chip, Stack, ButtonBase, Dialog, DialogContent,
-  IconButton } from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close"
+import { Box, Grid, Typography, Button, Chip, Stack } from "@mui/material"
 import GitHubIcon from "@mui/icons-material/GitHub"
 import LoginIcon from "@mui/icons-material/Login"
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban"
@@ -17,6 +14,8 @@ import LockIcon from "@mui/icons-material/Lock"
 
 import { AppFooter, AppContext, AppDialogs, DialogActions } from "@/react/app"
 import { FxThemeContext } from "@/fx/theme"
+import { SCREENSHOT_RATIO, CoverImg, GalleryImage, GALLERY, GalleryCard, Lightbox }
+  from "./HomePageGallery"
 
 const GITHUB_URL = "https://github.com/bbfrancis23/aqua-dogs"
 
@@ -70,18 +69,16 @@ const FeatureCard = ({icon, title, body}: Feature) => (
   </Grid>
 )
 
+// secondary.main stays a light tint in both light and dark mode (see getPaletteOptions in
+// fx/theme/index.ts), so text on it must stay dark too instead of following the
+// mode-flipping text.* tokens.
+const TINT_TEXT_PRIMARY = 'rgba(0, 0, 0, 0.87)'
+const TINT_TEXT_SECONDARY = 'rgba(0, 0, 0, 0.6)'
+const ChipSx = { color: TINT_TEXT_PRIMARY, borderColor: 'rgba(0, 0, 0, 0.23)' }
+
 const HeroTitleSx = { fontSize: {xs: '2.5rem', sm: '3.5rem'}, fontWeight: 700 }
 const HeroSubtitleSx = { fontSize: {xs: '1.1rem', sm: '1.35rem'}, fontWeight: 400,
-  color: 'text.secondary', mt: 2 }
-
-interface CoverImgProps { src: string; alt: string; sizes: string; priority?: boolean }
-
-const CoverImg = ({src, alt, sizes, priority}: CoverImgProps) => (
-  <Image src={src} alt={alt} fill sizes={sizes} priority={priority}
-    style={{ objectFit: 'cover' }} />
-)
-
-const SCREENSHOT_RATIO = '1917 / 905'
+  color: TINT_TEXT_SECONDARY, mt: 2 }
 
 const HeroCollageSx = { mt: 6, mb: 2, mx: 'auto', maxWidth: '820px', position: 'relative',
   aspectRatio: '16 / 11' }
@@ -124,9 +121,11 @@ const HeroCollage = () => (
 
 const Hero = ({onSignIn}: {onSignIn: () => void}) => (
   <Box sx={{ py: {xs: 6, sm: 10}, textAlign: 'center', bgcolor: 'secondary.main',
-    borderBottom: '1px solid', borderColor: 'divider' }}>
+    color: TINT_TEXT_PRIMARY, borderBottom: '1px solid', borderColor: 'divider' }}>
     <Box sx={{ maxWidth: '760px', mx: 'auto', px: 3 }}>
-      <Typography variant={'overline'} color={'text.secondary'}>Portfolio Project</Typography>
+      <Typography variant={'overline'} sx={{ color: TINT_TEXT_SECONDARY }}>
+        Portfolio Project
+      </Typography>
       <Typography variant={'h1'} sx={HeroTitleSx}>Strategy Fx</Typography>
       <Typography variant={'h2'} sx={HeroSubtitleSx}>
         A board and project management app, built solo from the database up
@@ -145,72 +144,6 @@ const Hero = ({onSignIn}: {onSignIn: () => void}) => (
     </Box>
     <HeroCollage />
   </Box>
-)
-
-interface GalleryImage { src: string; alt: string; caption: string }
-
-const GALLERY: GalleryImage[] = [
-  { src: '/images/marketing/Strategy-Board.png',
-    alt: 'A React board with a Custom Hook card dialog open, showing example hook code',
-    caption: 'Card detail with code snippets' },
-  { src: '/images/marketing/Standards-Item.png',
-    alt: 'A Strategies board with a MUI Theme Colors card dialog open, showing theme '
-      + 'palette code',
-    caption: 'Switchable board themes' },
-  { src: '/images/marketing/Workout-Board.png',
-    alt: 'A workout board tracking isolation exercises by muscle group',
-    caption: 'Flexible enough for a workout tracker' },
-  { src: '/images/marketing/Best-Practice.png',
-    alt: 'A React documentation page explaining the useReducer hook',
-    caption: 'In-depth documentation pages' },
-  { src: '/images/marketing/Member-Page.png',
-    alt: 'A member dashboard listing their projects',
-    caption: 'Member dashboard' },
-  { src: '/images/marketing/Member-Project-Page.png',
-    alt: 'A project page listing its members and boards',
-    caption: 'Project & team management' },
-]
-
-const GalleryTileSx = { position: 'relative', aspectRatio: SCREENSHOT_RATIO, border: '1px solid',
-  borderColor: 'divider', borderRadius: 2, overflow: 'hidden', transition: 'opacity 0.15s',
-  '&:hover': {opacity: 0.85} }
-const GallerySizes = '(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw'
-
-interface GalleryCardProps extends GalleryImage { onOpen: () => void }
-
-const GalleryCard = ({src, alt, caption, onOpen}: GalleryCardProps) => (
-  <Grid item xs={12} sm={6} md={4}>
-    <ButtonBase onClick={onOpen} sx={{ display: 'block', width: '100%', borderRadius: 2 }}>
-      <Box sx={GalleryTileSx}>
-        <CoverImg src={src} alt={alt} sizes={GallerySizes} />
-      </Box>
-    </ButtonBase>
-    <Typography variant={'body2'} color={'text.secondary'} sx={{ mt: 1 }}>{caption}</Typography>
-  </Grid>
-)
-
-const LightboxCloseSx = { position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper',
-  '&:hover': {bgcolor: 'background.paper'} }
-const LightboxImgBoxSx = { position: 'relative', width: '100%', aspectRatio: SCREENSHOT_RATIO }
-
-interface LightboxProps { image: GalleryImage | null; onClose: () => void }
-
-const Lightbox = ({image, onClose}: LightboxProps) => (
-  <Dialog open={Boolean(image)} onClose={onClose} maxWidth={'lg'} fullWidth>
-    { image && (
-      <>
-        <IconButton onClick={onClose} sx={LightboxCloseSx} aria-label={'Close'}>
-          <CloseIcon />
-        </IconButton>
-        <DialogContent sx={{ p: 0 }}>
-          <Box sx={LightboxImgBoxSx}>
-            <Image src={image.src} alt={image.alt} fill sizes={'90vw'}
-              style={{ objectFit: 'contain' }} />
-          </Box>
-        </DialogContent>
-      </>
-    ) }
-  </Dialog>
 )
 
 const Page = () => {
@@ -243,14 +176,17 @@ const Page = () => {
       </Box>
 
       {/* Stack */}
-      <Box sx={{ py: {xs: 5, sm: 7}, bgcolor: 'secondary.main', borderTop: '1px solid',
-        borderBottom: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+      <Box sx={{ py: {xs: 5, sm: 7}, bgcolor: 'secondary.main', color: TINT_TEXT_PRIMARY,
+        borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider',
+        textAlign: 'center' }}>
         <Typography variant={'h2'} sx={{ fontSize: '1.75rem', fontWeight: 600, mb: 3 }}>
           Built With
         </Typography>
         <Stack direction={'row'} spacing={1} justifyContent={'center'} flexWrap={'wrap'}
           sx={{ maxWidth: '700px', mx: 'auto', gap: 1 }}>
-          { STACK.map((s) => <Chip key={s} label={s} variant={'outlined'} />) }
+          { STACK.map((s) => (
+            <Chip key={s} label={s} variant={'outlined'} sx={ChipSx} />
+          )) }
         </Stack>
       </Box>
 
