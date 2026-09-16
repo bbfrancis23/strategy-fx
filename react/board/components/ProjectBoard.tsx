@@ -79,6 +79,7 @@ export const ProjectBoard = ( ) => {
       <Droppable droppableId="board" type="COLUMN" direction="horizontal" >
         { (provided) => (
           <Stack direction={'row'} spacing={1}
+            sx={{overflowX: 'auto', overflowY: 'hidden', pb: 1}}
             ref={provided.innerRef} {...provided.droppableProps}>
             { (orderedColKeys && boardKeyCols) && orderedColKeys.map((key: string, index:number) =>
               ( boardKeyCols[key] && (
