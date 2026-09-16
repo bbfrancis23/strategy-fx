@@ -6,15 +6,42 @@ let mongoServer: MongoMemoryServer | undefined
 let previousMongoConnect: string | undefined
 
 /**
+ * Restores MONGO_CONNECT to whatever it was before startTestDb() ran.
+ * `delete`s the key rather than assigning `undefined` when there was no
+ * prior value — process.env stringifies an `undefined` assignment to the
+ * literal string "undefined" instead of removing it.
+ */
+const restoreMongoConnect = () => {
+  if (previousMongoConnect === undefined) {
+    delete process.env.MONGO_CONNECT
+  } else {
+    process.env.MONGO_CONNECT = previousMongoConnect
+  }
+}
+
+/**
  * Starts an in-memory MongoDB instance and points the app's real
  * `mongo/db.js` connect logic at it, so tests exercise the actual
  * connection code path instead of a mocked one.
+ *
+ * If db.connect() throws, the memory server and the MONGO_CONNECT
+ * override are cleaned up before re-throwing, so a failed startTestDb()
+ * doesn't leak a running mongod process or a stale env var into later
+ * tests in the same Jest worker.
  */
 export const startTestDb = async () => {
   mongoServer = await MongoMemoryServer.create()
   previousMongoConnect = process.env.MONGO_CONNECT
   process.env.MONGO_CONNECT = mongoServer.getUri()
-  await db.connect()
+
+  try {
+    await db.connect()
+  } catch (err) {
+    restoreMongoConnect()
+    await mongoServer.stop()
+    mongoServer = undefined
+    throw err
+  }
 }
 
 /**
@@ -28,17 +55,16 @@ export const startTestDb = async () => {
  * would hit its "already connected" early-return and never connect to a
  * fresh memory server. Forcing NODE_ENV to 'production' for the call gets
  * a real disconnect *and* a correctly reset flag, then NODE_ENV is
- * restored.
+ * restored — via `delete` rather than assignment when it was previously
+ * unset, for the same "undefined" stringification reason documented on
+ * restoreMongoConnect() above.
  *
- * Also restores MONGO_CONNECT to whatever it was before startTestDb(). This
- * harness is meant to be reused across test files, and Jest can reuse
- * worker processes between them — without restoring it, a later suite in
- * the same worker that calls db.connect() without going through
- * startTestDb() first would pick up a stale pointer to an already-stopped
- * memory server instead of failing loudly or using its own. Note: MONGO_
- * CONNECT is `delete`d rather than set to `previousMongoConnect` when it
- * was previously unset — assigning `undefined` to a process.env property
- * stringifies it to the literal string "undefined" instead of removing it.
+ * Also restores MONGO_CONNECT: this harness is meant to be reused across
+ * test files, and Jest can reuse worker processes between them — without
+ * restoring it, a later suite in the same worker that calls db.connect()
+ * without going through startTestDb() first would pick up a stale pointer
+ * to an already-stopped memory server instead of failing loudly or using
+ * its own.
  */
 export const stopTestDb = async () => {
   // @types/node types NODE_ENV as read-only (it's meant to be fixed for
@@ -50,17 +76,16 @@ export const stopTestDb = async () => {
   try {
     await db.disconnect()
   } finally {
-    mutableEnv.NODE_ENV = previousNodeEnv
+    if (previousNodeEnv === undefined) {
+      delete mutableEnv.NODE_ENV
+    } else {
+      mutableEnv.NODE_ENV = previousNodeEnv
+    }
   }
 
   await mongoServer?.stop()
   mongoServer = undefined
-
-  if (previousMongoConnect === undefined) {
-    delete process.env.MONGO_CONNECT
-  } else {
-    process.env.MONGO_CONNECT = previousMongoConnect
-  }
+  restoreMongoConnect()
 }
 
 /** Drops all collections so each test starts from a clean database. */

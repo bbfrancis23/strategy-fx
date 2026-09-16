@@ -1,8 +1,9 @@
 import {reorderArray} from './board-functions'
 
 describe('reorderArray', () => {
-  it('returns an empty array when given a falsy array', () => {
-    expect(reorderArray({array: undefined as any, startIndex: 0, endIndex: 1})).toEqual([])
+  it('returns an empty array when array is undefined', () => {
+    const undefinedArray = undefined as unknown as any[]
+    expect(reorderArray({array: undefinedArray, startIndex: 0, endIndex: 1})).toEqual([])
   })
 
   it('moves an item forward in the array', () => {

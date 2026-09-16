@@ -17,6 +17,7 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return
   } else {
     res.status(405).json({message: 'Invalid Method'})
+    return
   }
 }
 
