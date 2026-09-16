@@ -15,6 +15,8 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } else if (req.method === 'DELETE') {
     await patchItem(req, res)
     return
+  } else {
+    res.status(405).json({message: 'Invalid Method'})
   }
 }
 
