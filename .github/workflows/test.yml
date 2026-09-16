@@ -19,6 +19,18 @@ jobs:
 
       - run: npm ci
 
+      # mongodb-memory-server (used by mongo/controls tests) downloads a
+      # MongoDB binary to ~/.cache/mongodb-binaries on first use. Without
+      # caching it, every run re-downloads it, adding time and a flakiness
+      # risk if the download source is slow/unavailable. Keyed on
+      # package-lock.json so it busts automatically on a version bump.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: ${{ runner.os }}-mongodb-binaries-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-mongodb-binaries-
+
       - run: npm run lint
 
       # --passWithNoTests: this milestone's test/CI setup issues (#406, #407)
