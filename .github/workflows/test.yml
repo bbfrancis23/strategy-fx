@@ -17,6 +17,20 @@ jobs:
           node-version: 22
           cache: npm
 
+      # mongodb-memory-server (used by mongo/controls tests) has a
+      # postinstall script that eagerly downloads a MongoDB binary to
+      # ~/.cache/mongodb-binaries during `npm ci` itself — so this cache
+      # must be restored *before* `npm ci` runs, not after, or a
+      # fresh/cache-miss runner downloads it regardless and the cache is
+      # write-only. Keyed on package-lock.json so it busts automatically
+      # on a version bump.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: ${{ runner.os }}-mongodb-binaries-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-mongodb-binaries-
+
       - run: npm ci
 
       - run: npm run lint
