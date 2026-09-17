@@ -2,7 +2,6 @@ import axios from 'axios'
 import db from '@/mongo/db'
 
 import Project from '@/mongo/schemas/ProjectSchema'
-import Board from '@/mongo/schemas/BoardSchema'
 import Column from '@/mongo/schemas/ColumnSchema'
 import Item from '@/mongo/schemas/ItemSchema'
 import Member from '@/mongo/schemas/MemberSchema'
@@ -46,12 +45,20 @@ export const createItem = async (req, res) => {
     })
 
     if (hasPermission) {
-      board = await Board.findOne({_id: req.query.boardId}).populate({
-        path: 'columns',
-        model: Column,
-      })
+      // findPublicBoard (not a shallow Board.findOne(...).populate('columns'))
+      // so this doubles as a properly-shaped fallback if the post-commit
+      // refresh below fails: it deep-populates columns -> items ->
+      // sections -> checkboxes, matching what the client actually expects
+      // a Board/Column to look like. A shallow populate here previously
+      // left each column's `items` as raw ObjectIds — not a valid
+      // fallback shape, since BoardColumn/ColumnList render each item as
+      // a full object.
+      board = await findPublicBoard(req.query.boardId)
 
-      if (board.project.toString() === projectId) {
+      if (!board) {
+        status = axios.HttpStatusCode.NotFound
+        message = 'Board not found'
+      } else if (board.project.toString() === projectId) {
         let column = board.columns.find((c) => c.id === req.query.columnId)
 
         if (column) {
@@ -88,16 +95,24 @@ export const createItem = async (req, res) => {
           // turn into a 500: the item was already saved successfully, and
           // CreateItemForm.tsx only treats a 201 response as success —
           // reporting failure here would make the client retry and
-          // create a duplicate item, while returning board as undefined
-          // would wipe the board out of the UI (setBoard(res.data.board)
-          // runs unconditionally on 201). Silently keeping the board
-          // object fetched before the transaction (stale — won't yet
-          // include the new item, but valid) is the least-bad fallback;
-          // still logged server-side so this rare case is visible for
-          // debugging.
+          // create a duplicate item. `board` is only reassigned when the
+          // refresh actually returns something: findPublicBoard can fail
+          // two different ways — throwing, or resolving to `null` (e.g.
+          // if the board's archive flag flipped in the moment between
+          // requests) — and only guarding the throw would let a null
+          // result silently overwrite the still-good pre-transaction
+          // `board` with null, which the client would then treat as a
+          // valid response and crash on. Keeping the pre-transaction
+          // board (stale — won't yet include the new item, but a
+          // properly-shaped, valid object) is the least-bad fallback
+          // either way; still logged server-side so this rare case is
+          // visible for debugging.
           if (status === axios.HttpStatusCode.Created) {
             try {
-              board = await findPublicBoard(req.query.boardId)
+              const refreshedBoard = await findPublicBoard(req.query.boardId)
+              if (refreshedBoard) {
+                board = refreshedBoard
+              }
             } catch (e) {
               console.log(e)
             }

@@ -34,6 +34,12 @@ jest.mock('@/mongo/controls/member/project/board/findPublicBoard', () => {
 
 const mockGetServerSession = getServerSession as jest.Mock
 const mockFindPublicBoard = findPublicBoard as jest.Mock
+// The real implementation, for tests that need the first of createItem's
+// two findPublicBoard calls to behave normally and only override the
+// second.
+const actualFindPublicBoard = jest.requireActual(
+  '@/mongo/controls/member/project/board/findPublicBoard'
+).default
 
 beforeAll(async () => {
   await startTestDb()
@@ -142,13 +148,17 @@ describe('createItem', () => {
     }
   })
 
-  it('still reports success if the item was saved but the post-commit board refresh fails', async () => {
+  it('still reports success if the item was saved but the post-commit board refresh throws', async () => {
     const {leader, project, board, column} = await seedProjectBoardColumn()
     mockGetServerSession.mockResolvedValue({user: {id: leader._id.toString()}})
 
-    // mockImplementationOnce is self-consuming — no manual restore needed,
-    // and restoreMocks:true (jest.config.js) resets it between tests too.
-    mockFindPublicBoard.mockImplementationOnce(() => {
+    // createItem calls findPublicBoard twice now (the initial fetch, which
+    // also serves as the fallback shape, and the post-commit refresh) — so
+    // the first call needs to behave normally and only the second should
+    // fail. mockImplementationOnce is self-consuming and queues in call
+    // order; restoreMocks:true (jest.config.js) resets all of this between
+    // tests regardless.
+    mockFindPublicBoard.mockImplementationOnce(actualFindPublicBoard).mockImplementationOnce(() => {
       throw new Error('simulated board refresh failure')
     })
 
@@ -168,11 +178,47 @@ describe('createItem', () => {
     expect(updatedColumn?.items).toHaveLength(1)
 
     // board falls back to the one fetched before the transaction (stale,
-    // but a valid object) rather than undefined — the client calls
-    // setBoard(res.data.board) unconditionally on success, so undefined
-    // would wipe the board out of the UI.
+    // but a valid, properly-shaped object) rather than undefined — the
+    // client calls setBoard(res.data.board) unconditionally on success, so
+    // undefined would wipe the board out of the UI.
     const body = res._getJSONData() as {board?: {_id?: string}}
     expect(body.board).toBeDefined()
     expect(body.board?._id?.toString()).toBe(board._id.toString())
+  })
+
+  it('still reports success with a properly-shaped fallback board if the refresh resolves to null', async () => {
+    const {leader, project, board, column} = await seedProjectBoardColumn()
+    mockGetServerSession.mockResolvedValue({user: {id: leader._id.toString()}})
+
+    // findPublicBoard fails two different ways: throwing, or resolving to
+    // null (e.g. the board's archive flag flipped in between requests) —
+    // this is the null path, which the throw-only version of the guard
+    // wouldn't have caught: it would have silently overwritten the good
+    // pre-transaction board with null.
+    mockFindPublicBoard
+      .mockImplementationOnce(actualFindPublicBoard)
+      .mockImplementationOnce(async () => null)
+
+    const {req, res} = createMocks<NextApiRequest, NextApiResponse>({
+      method: 'POST',
+      query: {projectId: project.id, boardId: board.id, columnId: column.id},
+      body: {title: 'New Item'},
+    })
+
+    await createItem(req, res)
+
+    expect(res.statusCode).toBe(axios.HttpStatusCode.Created)
+
+    const body = res._getJSONData() as {
+      board?: {_id?: string; columns?: {items?: unknown[]}[]}
+    }
+    expect(body.board).not.toBeNull()
+    expect(body.board?._id?.toString()).toBe(board._id.toString())
+
+    // Also confirms the fallback is properly deep-populated (the actual
+    // bug behind the "not a valid frontend Board" finding): a shallow
+    // populate would leave each column's items as raw ids rather than
+    // full item objects.
+    expect(Array.isArray(body.board?.columns?.[0]?.items)).toBe(true)
   })
 })
