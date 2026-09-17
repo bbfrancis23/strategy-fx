@@ -22,11 +22,11 @@ jest.mock('next-auth/next', () => ({
 
 const mockGetServerSession = getServerSession as jest.Mock
 
-// Longer hook timeout: MongoMemoryServer.create() downloads a MongoDB
-// binary on first run (uncached machine/CI runner), which can easily
-// exceed Jest's default 5s hook timeout and fail the suite for reasons
-// unrelated to the test logic. Any future mongo/controls test using this
-// harness should do the same.
+// Longer hook timeout: startTestDb() spins up an in-memory MongoDB
+// replica set and downloads a MongoDB binary on first run (uncached
+// machine/CI runner), which can easily exceed Jest's default 5s hook
+// timeout and fail the suite for reasons unrelated to the test logic. Any
+// future mongo/controls test using this harness should do the same.
 beforeAll(async () => {
   await startTestDb()
 }, 60_000)

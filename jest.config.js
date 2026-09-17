@@ -35,6 +35,10 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper,
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  // Auto-restores jest.spyOn mocks (implementation + original) after each
+  // test, so a spy set up in one test can't leak into a later one if a
+  // failed assertion skips its manual mockRestore() call.
+  restoreMocks: true,
   // Without this, `--coverage` only reports on files actually imported
   // by tests, not the whole codebase.
   collectCoverageFrom: [

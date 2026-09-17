@@ -1,8 +1,8 @@
-import {MongoMemoryServer} from 'mongodb-memory-server'
+import {MongoMemoryReplSet} from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import db from '@/mongo/db'
 
-let mongoServer: MongoMemoryServer | undefined
+let mongoServer: MongoMemoryReplSet | undefined
 let previousMongoConnect: string | undefined
 
 /**
@@ -24,13 +24,32 @@ const restoreMongoConnect = () => {
  * `mongo/db.js` connect logic at it, so tests exercise the actual
  * connection code path instead of a mocked one.
  *
+ * Uses a single-node replica set, not a plain standalone MongoMemoryServer
+ * — most of the mongo/controls functions use mongoose.startSession()
+ * transactions, which a standalone instance rejects outright ("Transaction
+ * numbers are only allowed on a replica set member or mongos"). A replica
+ * set can do everything a standalone instance can, so this covers
+ * non-transactional controls too.
+ *
  * If db.connect() throws, the memory server and the MONGO_CONNECT
  * override are cleaned up before re-throwing, so a failed startTestDb()
  * doesn't leak a running mongod process or a stale env var into later
  * tests in the same Jest worker.
  */
 export const startTestDb = async () => {
-  mongoServer = await MongoMemoryServer.create()
+  mongoServer = await MongoMemoryReplSet.create({
+    replSet: {count: 1},
+    // Pinned to a well-established series rather than mongodb-memory-
+    // server's default (whatever the latest MongoDB release is, currently
+    // 8.x) for determinism. Note: a handshake error hit during development
+    // ("Missing required sub-document 'driver' in the client metadata
+    // document") looked at first like a server-version incompatibility,
+    // but turned out to be an upstream bug in mongodb-memory-server-core's
+    // own bundled mongodb driver (7.6.0) — see the "overrides" entry in
+    // package.json, which pins that nested dependency to 7.5.0. Changing
+    // this binary version alone does not fix it.
+    binary: {version: '7.0.14'},
+  })
   previousMongoConnect = process.env.MONGO_CONNECT
   process.env.MONGO_CONNECT = mongoServer.getUri()
 
