@@ -55,6 +55,16 @@ export const createItem = async (req, res) => {
       // a full object.
       board = await findPublicBoard(req.query.boardId)
 
+      // findPublicBoard() disconnects internally when it finishes (see
+      // mongo/db.js — a real disconnect in production, a no-op under
+      // Jest's NODE_ENV=test, which is exactly why this didn't show up
+      // in tests). Reconnect before the transaction below needs the
+      // connection — without this, mongoose.startSession() and every
+      // subsequent query fails with MongoNotConnectedError in production,
+      // the same bug class #421 was about, reintroduced here by routing
+      // this pre-transaction fetch through findPublicBoard().
+      await db.connect()
+
       if (!board) {
         status = axios.HttpStatusCode.NotFound
         message = 'Board not found'
