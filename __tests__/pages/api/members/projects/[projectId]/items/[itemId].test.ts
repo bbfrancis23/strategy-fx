@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import {createMocks} from 'node-mocks-http'
 import {NextApiRequest, NextApiResponse} from 'next'
-import handler from './[itemId]'
+import handler from '@/pages/api/members/projects/[projectId]/items/[itemId]'
 import getItem from '@/mongo/controls/member/project/items/getItem'
 import {patchItem} from '@/mongo/controls/member/project/items/patchItem'
 
