@@ -13,13 +13,11 @@ import {authOptions} from '@/pages/api/auth/[...nextauth]'
 import {PermissionCodes, permission} from '@/fx/ui/PermissionComponent'
 
 import findPublicBoard from '@/mongo/controls/member/project/board/findPublicBoard'
-
-import mongoose from 'mongoose'
+import {runInTransaction} from '@/mongo/controls/runInTransaction'
 
 export const createItem = async (req, res) => {
   let status = axios.HttpStatusCode.Created
   let message = ''
-  let item = undefined
   let board = undefined
 
   const authSession = await getServerSession(req, res, authOptions)
@@ -57,49 +55,52 @@ export const createItem = async (req, res) => {
         let column = board.columns.find((c) => c.id === req.query.columnId)
 
         if (column) {
-          const dbSession = await mongoose.startSession()
+          const columnId = column._id
 
           try {
-            dbSession.startTransaction()
+            await runInTransaction(async (dbSession) => {
+              const newItem = new Item({
+                title: req.body.title,
+                owners: [authSession.user.id],
+                scope: 'private',
+              })
+              await newItem.save({session: dbSession})
 
-            const newItem = new Item({
-              title: req.body.title,
-              owners: [authSession.user.id],
-              scope: 'private',
+              // Re-fetched here rather than reusing the outer `column`
+              // (populated before the transaction started): saving that
+              // one would write back a document read outside the
+              // transaction's consistent snapshot, so a concurrent
+              // update to this same column between that read and this
+              // save could get silently overwritten — the exact lost-
+              // update bug patchBoardCols.js was fixed for.
+              const sessionColumn = await Column.findById(columnId).session(dbSession)
+              sessionColumn.items.push(newItem)
+              await sessionColumn.save({session: dbSession})
             })
-
-            await newItem.save({dbSession})
-
-            await column.items.push(newItem)
-
-            await column.save({dbSession})
-            await dbSession.commitTransaction()
-
-            column = await column.toObject({getters: true})
-            status = axios.HttpStatusCode.Created
-
-            item = newItem.toObject({getters: true})
-
-            // board = await Board.findOne({
-            //   _id: req.query.boardId,
-            //   project: req.query.projectId,
-            // }).populate({
-            //   path: 'columns',
-            //   populate: {path: 'items', model: Item},
-            // })
-
-            // board = board.toObject({getters: true, flattenMaps: true})
-
-            board = await findPublicBoard(req.query.boardId)
           } catch (e) {
-            console.log('ERROR ERROR', e)
-
-            await dbSession.abortTransaction()
-            dbSession.endSession()
-
-            console.log('there was an error', e)
+            console.log(e)
             status = axios.HttpStatusCode.InternalServerError
-            message = e
+            message = 'Error creating item'
+          }
+
+          // Separate try/catch: the transaction above already committed,
+          // so a failure here must not touch it. Deliberately does NOT
+          // turn into a 500: the item was already saved successfully, and
+          // CreateItemForm.tsx only treats a 201 response as success —
+          // reporting failure here would make the client retry and
+          // create a duplicate item, while returning board as undefined
+          // would wipe the board out of the UI (setBoard(res.data.board)
+          // runs unconditionally on 201). Silently keeping the board
+          // object fetched before the transaction (stale — won't yet
+          // include the new item, but valid) is the least-bad fallback;
+          // still logged server-side so this rare case is visible for
+          // debugging.
+          if (status === axios.HttpStatusCode.Created) {
+            try {
+              board = await findPublicBoard(req.query.boardId)
+            } catch (e) {
+              console.log(e)
+            }
           }
         } else {
           status = axios.HttpStatusCode.Forbidden
