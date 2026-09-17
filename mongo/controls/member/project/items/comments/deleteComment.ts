@@ -56,6 +56,15 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
     return
   }
 
+  // The route trusts projectId/itemId/commentId independently — without
+  // this, a project leader/admin (passing their own real projectId) could
+  // supply an unrelated project's itemId/commentId and delete a comment
+  // that doesn't belong to either, via the leader/admin fallback below.
+  if (comment.itemid?.toString() !== item._id.toString()) {
+    notFoundRes(res, 'Comment not found')
+    return
+  }
+
   comment = await comment.toObject({getters: true, flattenMaps: true})
   let feComment: any = JSON.stringify(comment)
   feComment = await JSON.parse(feComment)
@@ -68,35 +77,51 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
     comment: feComment,
   })
 
-  if (!hasPermission) {
+  // A comment with no owner (orphaned/legacy data, or the owner account no
+  // longer exists) fails COMMENT_OWNER for everyone permanently — with no
+  // fallback that would otherwise be a comment nobody can ever delete.
+  // Project leader/admins can act as a fallback so there's a real
+  // resolution path instead of a dead end.
+  const isProjectLeaderOrAdmin =
+    project.leader?.toString() === castSession.user.id ||
+    project.admins?.some((adminId: any) => adminId.toString() === castSession.user.id)
+
+  if (!hasPermission && !isProjectLeaderOrAdmin) {
     unauthRes(res, 'You do not have permission to edit this comment')
     return
   }
 
   ///////////////////////
 
-  const dbSession = await mongoose.startSession()
+  let dbSession: mongoose.ClientSession | undefined
   try {
+    dbSession = await mongoose.startSession()
     dbSession.startTransaction()
 
-    await Comment.deleteOne({_id: commentId})
+    await Comment.deleteOne({_id: commentId}, {session: dbSession})
 
     await item.comments.pull(comment)
-    await item.save({dbSession})
+    await item.save({session: dbSession})
     await dbSession.commitTransaction()
 
     dbSession.endSession()
   } catch (e) {
-    await dbSession.abortTransaction()
-    dbSession.endSession()
+    if (dbSession) {
+      await dbSession.abortTransaction()
+      dbSession.endSession()
+    }
     console.log(e)
-    serverErrRes(res, 'Error deleting section')
+    serverErrRes(res, 'Error deleting comment')
+    return
   }
 
   ////////////////////
 
-  await db.disconnect()
-
+  // Re-fetch before disconnecting, not after — db.disconnect() actually
+  // tears down the connection in production (it's a no-op in dev, which is
+  // why this never showed up locally), so querying after it throws
+  // MongoNotConnectedError. createComment.ts/patchComment.ts already do
+  // this in the correct order; this file had it backwards.
   item = await Item.findById(itemId).populate([
     {path: 'sections', model: Section},
     {path: 'comments', model: Comment, populate: {path: 'owner', model: Member}},
@@ -106,6 +131,8 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
 
   item = JSON.stringify(item)
   item = await JSON.parse(item)
+
+  await db.disconnect()
 
   return res.status(axios.HttpStatusCode.Ok).json({
     message: 'Comment was saved',

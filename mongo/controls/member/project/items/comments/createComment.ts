@@ -55,15 +55,21 @@ export const createComment = async (req: NextApiRequest, res: NextApiResponse) =
     owner: castSession.user.id,
   })
 
+  let dbSession: mongoose.ClientSession | undefined
   try {
-    const dbSession = await mongoose.startSession()
+    dbSession = await mongoose.startSession()
     dbSession.startTransaction()
-    await newComment.save({dbSession})
+    await newComment.save({session: dbSession})
     await item.comments.push(newComment)
-    await item.save({dbSession})
+    await item.save({session: dbSession})
 
     await dbSession.commitTransaction()
+    dbSession.endSession()
   } catch (e) {
+    if (dbSession) {
+      await dbSession.abortTransaction()
+      dbSession.endSession()
+    }
     console.log(e)
     internalServerErrorResponse(res, 'Error creating comment')
     return
