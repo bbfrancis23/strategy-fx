@@ -117,8 +117,11 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
 
   ////////////////////
 
-  await db.disconnect()
-
+  // Re-fetch before disconnecting, not after — db.disconnect() actually
+  // tears down the connection in production (it's a no-op in dev, which is
+  // why this never showed up locally), so querying after it throws
+  // MongoNotConnectedError. createComment.ts/patchComment.ts already do
+  // this in the correct order; this file had it backwards.
   item = await Item.findById(itemId).populate([
     {path: 'sections', model: Section},
     {path: 'comments', model: Comment, populate: {path: 'owner', model: Member}},
@@ -128,6 +131,8 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
 
   item = JSON.stringify(item)
   item = await JSON.parse(item)
+
+  await db.disconnect()
 
   return res.status(axios.HttpStatusCode.Ok).json({
     message: 'Comment was saved',
