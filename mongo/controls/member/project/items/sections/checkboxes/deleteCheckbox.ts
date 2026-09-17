@@ -36,23 +36,46 @@ export const deleteCheckbox = async (req: NextApiRequest, res: NextApiResponse) 
 
   const section = await Section.findById(sectionId)
   if (!section) return notFoundRes(res, 'Section not found')
-  const dbSession = await mongoose.startSession()
 
-  try {
-    dbSession.startTransaction()
-    await Checkbox.deleteOne({_id: checkboxId})
-    await section.checkboxes.pull(section)
-    await item.save({dbSession})
-    await dbSession.commitTransaction()
-    item = await findItem(section.itemid)
-    dbSession.endSession()
-  } catch (e) {
-    await dbSession.abortTransaction()
-    dbSession.endSession()
-    console.log(e)
-    serverErrRes(res, 'Error deleting checkbox')
+  // itemId/sectionId/checkboxId are otherwise trusted independently —
+  // without this, an owner of *some* item could pass their own real
+  // itemId alongside an unrelated section/checkbox belonging to a
+  // different item/project. Same class of gap fixed in deleteComment.ts
+  // (commit 7204b7e).
+  if (section.itemid?.toString() !== item._id.toString()) {
+    return notFoundRes(res, 'Section not found')
+  }
+  if (!section.checkboxes.some((id: mongoose.Types.ObjectId) => id.toString() === checkbox._id.toString())) {
+    return notFoundRes(res, 'Checkbox not found')
   }
 
+  let dbSession: mongoose.ClientSession | undefined
+  try {
+    dbSession = await mongoose.startSession()
+    dbSession.startTransaction()
+    await Checkbox.deleteOne({_id: checkboxId}, {session: dbSession})
+    await section.checkboxes.pull(checkbox)
+    await section.save({session: dbSession})
+    await dbSession.commitTransaction()
+    dbSession.endSession()
+  } catch (e) {
+    // Guard with inTransaction(): if the failure happens after
+    // commitTransaction() already succeeded (e.g. the re-fetch below did,
+    // back when it lived inside this try), calling abortTransaction() on
+    // an already-committed session throws ("Cannot call abortTransaction
+    // after calling commitTransaction") — uncaught, which would skip
+    // serverErrRes() entirely and leave the request with no response at
+    // all, worse than the bug this catch block exists to handle.
+    if (dbSession?.inTransaction()) {
+      await dbSession.abortTransaction()
+    }
+    dbSession?.endSession()
+    console.log(e)
+    serverErrRes(res, 'Error deleting checkbox')
+    return
+  }
+
+  item = await findItem(section.itemid)
   await db.disconnect()
   res.status(axios.HttpStatusCode.Ok).json({
     message: 'Checkbox was deleted',
