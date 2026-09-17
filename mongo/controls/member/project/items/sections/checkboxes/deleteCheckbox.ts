@@ -54,14 +54,26 @@ export const deleteCheckbox = async (req: NextApiRequest, res: NextApiResponse) 
     dbSession = await mongoose.startSession()
     dbSession.startTransaction()
     await Checkbox.deleteOne({_id: checkboxId}, {session: dbSession})
-    await section.checkboxes.pull(checkbox)
-    await section.save({session: dbSession})
+    // updateMany rather than mutating/saving just the one loaded `section`:
+    // patchSection.ts lets a client overwrite `section.checkboxes` with
+    // arbitrary ids (`section.checkboxes = checkboxes`), so the same
+    // checkbox id can end up referenced by more than one section even
+    // though the model otherwise assumes single ownership. Deleting the
+    // Checkbox document globally while only cleaning up one section's
+    // reference would leave dangling ids in any other section that also
+    // references it — the same class of orphaned-reference bug this PR
+    // exists to fix. Pulling it from every section that references it
+    // closes that gap.
+    await Section.updateMany(
+      {checkboxes: checkbox._id},
+      {$pull: {checkboxes: checkbox._id}},
+      {session: dbSession}
+    )
     await dbSession.commitTransaction()
     dbSession.endSession()
   } catch (e) {
     // Guard with inTransaction(): if the failure happens after
-    // commitTransaction() already succeeded (e.g. the re-fetch below did,
-    // back when it lived inside this try), calling abortTransaction() on
+    // commitTransaction() already succeeded, calling abortTransaction() on
     // an already-committed session throws ("Cannot call abortTransaction
     // after calling commitTransaction") — uncaught, which would skip
     // serverErrRes() entirely and leave the request with no response at
@@ -71,12 +83,23 @@ export const deleteCheckbox = async (req: NextApiRequest, res: NextApiResponse) 
     }
     dbSession?.endSession()
     console.log(e)
-    serverErrRes(res, 'Error deleting checkbox')
-    return
+    return serverErrRes(res, 'Error deleting checkbox')
   }
 
-  item = await findItem(section.itemid)
-  await db.disconnect()
+  // Separate try/catch: the transaction above already committed, so a
+  // failure here must not touch dbSession (nothing to abort) but still
+  // needs to send a real response — left unhandled, a failure in this
+  // re-fetch (e.g. findItem()'s own db.connect() failing to re-establish)
+  // would throw uncaught and leave the request hanging with no response
+  // at all, even though the deletion itself already succeeded.
+  try {
+    item = await findItem(section.itemid)
+    await db.disconnect()
+  } catch (e) {
+    console.log(e)
+    return serverErrRes(res, 'Error deleting checkbox')
+  }
+
   res.status(axios.HttpStatusCode.Ok).json({
     message: 'Checkbox was deleted',
     item,

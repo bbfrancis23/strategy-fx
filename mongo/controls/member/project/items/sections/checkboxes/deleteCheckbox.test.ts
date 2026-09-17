@@ -70,7 +70,7 @@ describe('deleteCheckbox', () => {
     expect(updatedSection?.checkboxes).toHaveLength(0)
   })
 
-  it('sends only one response when the transaction fails', async () => {
+  it('rolls back the deletion and sends only one response when a later transactional step fails', async () => {
     const memberId = new mongoose.Types.ObjectId().toString()
     mockGetServerSession.mockResolvedValue({user: {id: memberId}})
 
@@ -82,7 +82,13 @@ describe('deleteCheckbox', () => {
       checkboxes: [checkbox._id],
     }).save()
 
-    const deleteOneSpy = jest.spyOn(Checkbox, 'deleteOne').mockImplementationOnce(() => {
+    // Let Checkbox.deleteOne succeed for real, then fail the *next*
+    // transactional step. Failing before any write happens (as an
+    // earlier version of this test did, mocking deleteOne itself) never
+    // actually exercises rollback — it just proves an error path returns
+    // a response. Failing here proves the already-applied deleteOne
+    // write gets rolled back when the transaction as a whole fails.
+    const updateManySpy = jest.spyOn(Section, 'updateMany').mockImplementationOnce(() => {
       throw new Error('simulated transaction failure')
     })
 
@@ -101,12 +107,22 @@ describe('deleteCheckbox', () => {
       // is what that regression would have violated.
       expect(jsonSpy).toHaveBeenCalledTimes(1)
       expect(res.statusCode).toBe(axios.HttpStatusCode.InternalServerError)
+
+      // The rollback itself: the checkbox deletion that already ran
+      // before the injected failure must not have stuck.
+      expect(await Checkbox.findById(checkbox._id)).not.toBeNull()
+      const unchangedSection = await Section.findById(section._id)
+      expect(
+        unchangedSection?.checkboxes.map((id: mongoose.Types.ObjectId) => id.toString())
+      ).toContain(checkbox._id.toString())
     } finally {
-      // In a `finally` rather than as the last statement: a failed
-      // assertion above would otherwise skip this and leak the mocked
-      // Checkbox.deleteOne into later tests (no restoreMocks/clearMocks
-      // configured in jest.config.js).
-      deleteOneSpy.mockRestore()
+      // In a `finally` rather than as the last statement so a failed
+      // assertion above can't skip it. This is redundant with
+      // jest.config.js's `restoreMocks: true` (which would also restore
+      // this spy automatically between tests), but kept explicit so this
+      // test's own cleanup is clear without needing to know about that
+      // global setting.
+      updateManySpy.mockRestore()
     }
   })
 
@@ -166,5 +182,44 @@ describe('deleteCheckbox', () => {
 
     expect(res.statusCode).toBe(axios.HttpStatusCode.NotFound)
     expect(await Checkbox.findById(unrelatedCheckbox._id)).not.toBeNull()
+  })
+
+  it('removes the checkbox reference from every section that references it, not just the requested one', async () => {
+    const memberId = new mongoose.Types.ObjectId().toString()
+    mockGetServerSession.mockResolvedValue({user: {id: memberId}})
+
+    // patchSection.ts lets a client overwrite a section's checkboxes with
+    // arbitrary ids, so the same checkbox id can end up referenced by more
+    // than one section even though the model otherwise assumes single
+    // ownership. This simulates that: the same checkbox referenced by two
+    // sections under the same item.
+    const item = await new Item({title: 'Item', owners: [memberId]}).save()
+    const checkbox = await new Checkbox({label: 'Shared'}).save()
+    const sectionA = await new Section({
+      content: 'Checklist A',
+      itemid: item._id,
+      checkboxes: [checkbox._id],
+    }).save()
+    const sectionB = await new Section({
+      content: 'Checklist B',
+      itemid: item._id,
+      checkboxes: [checkbox._id],
+    }).save()
+
+    const {req, res} = createMocks<NextApiRequest, NextApiResponse>({
+      method: 'DELETE',
+      query: {itemId: item.id, checkboxId: checkbox.id, sectionId: sectionA.id},
+    })
+
+    await deleteCheckbox(req, res)
+
+    expect(res.statusCode).toBe(axios.HttpStatusCode.Ok)
+    expect(await Checkbox.findById(checkbox._id)).toBeNull()
+
+    // Not just sectionA (the one named in the request) — sectionB, which
+    // also referenced the now-deleted checkbox, must not be left with a
+    // dangling reference either.
+    const updatedSectionB = await Section.findById(sectionB._id)
+    expect(updatedSectionB?.checkboxes).toHaveLength(0)
   })
 })
