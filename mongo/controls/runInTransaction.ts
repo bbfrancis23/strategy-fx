@@ -21,18 +21,29 @@ import mongoose from 'mongoose'
 export const runInTransaction = async (
   work: (dbSession: mongoose.ClientSession) => Promise<void>
 ): Promise<void> => {
-  let dbSession: mongoose.ClientSession | undefined
+  // Created outside the try/finally: if startSession() itself throws,
+  // there's nothing to clean up, so it's fine for that to propagate
+  // directly to the caller.
+  const dbSession = await mongoose.startSession()
+
   try {
-    dbSession = await mongoose.startSession()
     dbSession.startTransaction()
     await work(dbSession)
     await dbSession.commitTransaction()
-    dbSession.endSession()
   } catch (e) {
-    if (dbSession?.inTransaction()) {
+    // inTransaction() guards against calling abortTransaction() on an
+    // already-committed session, which throws.
+    if (dbSession.inTransaction()) {
       await dbSession.abortTransaction()
     }
-    dbSession?.endSession()
     throw e
+  } finally {
+    // In `finally`, not as the last statement of the try/catch: if this
+    // lived only at the end of the try block, a failure partway through
+    // (or in abortTransaction() itself) would skip it entirely, leaking
+    // the session — and since abortTransaction() failing would also
+    // replace the original error with its own, `finally` is what
+    // guarantees cleanup runs regardless of which path was taken.
+    dbSession.endSession()
   }
 }
