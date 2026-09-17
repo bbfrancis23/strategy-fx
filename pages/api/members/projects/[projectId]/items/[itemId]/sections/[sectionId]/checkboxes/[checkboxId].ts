@@ -1,6 +1,9 @@
-import {patchCheckbox} from '@/controls/member/project/items/sections/checkboxes/patchCheckbox'
-
-import {deleteCheckbox} from '@/controls/member/project/items/sections/checkboxes/deleteCheckbox'
+import {
+  patchCheckbox,
+} from '@/mongo/controls/member/project/items/sections/checkboxes/patchCheckbox'
+import {
+  deleteCheckbox,
+} from '@/mongo/controls/member/project/items/sections/checkboxes/deleteCheckbox'
 import {NextApiRequest, NextApiResponse} from 'next/types'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
