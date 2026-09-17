@@ -68,29 +68,42 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
     comment: feComment,
   })
 
-  if (!hasPermission) {
+  // A comment with no owner (orphaned/legacy data, or the owner account no
+  // longer exists) fails COMMENT_OWNER for everyone permanently — with no
+  // fallback that would otherwise be a comment nobody can ever delete.
+  // Project leader/admins can act as a fallback so there's a real
+  // resolution path instead of a dead end.
+  const isProjectLeaderOrAdmin =
+    project.leader?.toString() === castSession.user.id ||
+    project.admins?.some((adminId: any) => adminId.toString() === castSession.user.id)
+
+  if (!hasPermission && !isProjectLeaderOrAdmin) {
     unauthRes(res, 'You do not have permission to edit this comment')
     return
   }
 
   ///////////////////////
 
-  const dbSession = await mongoose.startSession()
+  let dbSession: mongoose.ClientSession | undefined
   try {
+    dbSession = await mongoose.startSession()
     dbSession.startTransaction()
 
-    await Comment.deleteOne({_id: commentId})
+    await Comment.deleteOne({_id: commentId}, {session: dbSession})
 
     await item.comments.pull(comment)
-    await item.save({dbSession})
+    await item.save({session: dbSession})
     await dbSession.commitTransaction()
 
     dbSession.endSession()
   } catch (e) {
-    await dbSession.abortTransaction()
-    dbSession.endSession()
+    if (dbSession) {
+      await dbSession.abortTransaction()
+      dbSession.endSession()
+    }
     console.log(e)
-    serverErrRes(res, 'Error deleting section')
+    serverErrRes(res, 'Error deleting comment')
+    return
   }
 
   ////////////////////

@@ -63,7 +63,7 @@ export const permission = ( props: permissionFunction): boolean => {
 
   if(code === PermissionCodes.COMMENT_OWNER){
     if(!comment) return false
-    if(comment.owner.id === member.id) return true
+    if(comment.owner?.id === member.id) return true
   }
 
   return false

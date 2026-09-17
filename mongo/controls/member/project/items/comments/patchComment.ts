@@ -84,7 +84,16 @@ export const patchComment = async (req: NextApiRequest, res: NextApiResponse) =>
     comment: feComment,
   })
 
-  if (!hasPermission) {
+  // A comment with no owner (orphaned/legacy data, or the owner account no
+  // longer exists) fails COMMENT_OWNER for everyone permanently — with no
+  // fallback that would otherwise be a comment nobody can ever edit.
+  // Project leader/admins can act as a fallback so there's a real
+  // resolution path instead of a dead end.
+  const isProjectLeaderOrAdmin =
+    project.leader?.toString() === castSession.user.id ||
+    project.admins?.some((adminId: any) => adminId.toString() === castSession.user.id)
+
+  if (!hasPermission && !isProjectLeaderOrAdmin) {
     unauthorizedResponse(res, 'You do not have permission to edit this comment')
     return
   }
