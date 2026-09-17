@@ -56,6 +56,15 @@ export const deleteComment = async (req: NextApiRequest, res: NextApiResponse) =
     return
   }
 
+  // The route trusts projectId/itemId/commentId independently — without
+  // this, a project leader/admin (passing their own real projectId) could
+  // supply an unrelated project's itemId/commentId and delete a comment
+  // that doesn't belong to either, via the leader/admin fallback below.
+  if (comment.itemid?.toString() !== item._id.toString()) {
+    notFoundRes(res, 'Comment not found')
+    return
+  }
+
   comment = await comment.toObject({getters: true, flattenMaps: true})
   let feComment: any = JSON.stringify(comment)
   feComment = await JSON.parse(feComment)
