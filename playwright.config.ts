@@ -25,6 +25,9 @@ export default defineConfig({
     command: 'npm run build && npm run start',
     url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000,
+    // `next build` alone takes ~2.5min here (this app does heavy SSG
+    // against a live external content API at build time) — 180s wasn't
+    // enough margin before `next start` even got a chance to boot.
+    timeout: 5 * 60 * 1000,
   },
 })
