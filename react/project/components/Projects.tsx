@@ -31,7 +31,8 @@ const Projects = (props: ProjectsProps) => {
           </Grid>
         ) ) }
         <Grid item xs={6} sm={3} md={2} sx={{p: 1}}>
-          <Button onClick={() => setShowProjectForm(true)} sx={{ m: 0, p: 0, width: '100%'}}>
+          <Button aria-label="create-project" onClick={() => setShowProjectForm(true)}
+            sx={{ m: 0, p: 0, width: '100%'}}>
             <ProjectStub />
           </Button>
         </Grid>
