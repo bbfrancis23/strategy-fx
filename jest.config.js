@@ -34,7 +34,10 @@ const customJestConfig = {
   // into the node environment with a `@jest-environment node` docblock.
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper,
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  // e2e/ holds Playwright specs (*.spec.ts), which match Jest's default
+  // testMatch just like Jest's own *.test.ts files do — excluded here so
+  // Jest doesn't try to run them against `@playwright/test`'s API.
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/e2e/'],
   // Auto-restores jest.spyOn mocks (implementation + original) after each
   // test, so a spy set up in one test can't leak into a later one if a
   // failed assertion skips its manual mockRestore() call.

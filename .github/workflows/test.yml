@@ -40,3 +40,72 @@ jobs:
       # would otherwise fail on every PR in between purely for lacking tests.
       # Safe to drop once the repo has a permanent baseline of test files.
       - run: npm test -- --coverage --passWithNoTests
+
+  e2e:
+    runs-on: ubuntu-latest
+    # Separate job from `test` above: this one needs a long-lived `next
+    # start` server process and a persistent Mongo connection for the
+    # whole run, unlike the Jest job's short-lived per-suite memory server.
+    env:
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: e2e-ci-secret
+      MAIL: e2e-ci@example.com
+      GOOGLE_ID: ''
+      GOOGLE_SECRET: ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # See the `test` job above for why this must be restored before
+      # `npm ci`, not after.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: ${{ runner.os }}-mongodb-binaries-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-mongodb-binaries-
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      # Started in the background and disowned so it outlives this step's
+      # shell and stays up for the `npm run test:e2e` step later in the
+      # job, which triggers Playwright's webServer (`next build && next
+      # start`) — that server reads MONGO_CONNECT from $GITHUB_ENV, which
+      # this script appends to once the replica set is ready.
+      - name: Start in-memory MongoDB for E2E
+        run: |
+          node e2e/scripts/start-ci-mongo.mjs > mongo.log 2>&1 &
+          disown
+          for i in $(seq 1 60); do
+            if grep -q "ready at" mongo.log; then
+              break
+            fi
+            sleep 1
+          done
+          cat mongo.log
+          grep -q "ready at" mongo.log
+
+      # CI=true is already set by GitHub Actions on every step, which is
+      # what makes e2e/scripts/run-e2e.mjs skip starting its own (redundant)
+      # local memory server here and use the one started above instead.
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
