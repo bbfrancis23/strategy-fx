@@ -1,8 +1,6 @@
 import {test, expect} from './fixtures/auth'
 
 test('creates a project and navigates to it', async ({page, account}) => {
-  void account
-
   // The target page's getServerSideProps does several sequential DB calls
   // (findProject, findMember, findProjectBoards, a permission check) and
   // was observed taking 20s+ against the E2E in-memory Mongo instance —
