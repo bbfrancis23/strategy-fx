@@ -7,7 +7,14 @@ import {defineConfig, devices} from '@playwright/test'
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  // Serial, not parallel: every spec hits the same single `next start`
+  // process and single-node in-memory Mongo replica set. Running specs
+  // concurrently surfaced a real race in mongo/db.js's connection-caching
+  // logic (a MongoNotConnectedError-class failure) under simultaneous
+  // register/login/create bursts — out of scope to fix in app code for a
+  // testing issue, so the suite runs one spec at a time instead.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: 'html',

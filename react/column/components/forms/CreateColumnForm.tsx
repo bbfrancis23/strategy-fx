@@ -86,7 +86,7 @@ export const CreateColumnForm = () => {
   )
 
   return( showForm ? ColumnForm :
-    <Box><Button onClick={() => setShowForm(true)}
+    <Box><Button aria-label="create-column" onClick={() => setShowForm(true)}
       sx={{ m: 0, p: 0,
         bgcolor: alpha(fxTheme.theme.palette.background.default, 0.4)}}>
       <ColumnStub /></Button></Box>

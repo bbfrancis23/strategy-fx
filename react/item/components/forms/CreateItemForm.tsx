@@ -83,7 +83,8 @@ const CreateItemForm = ({column}: CreateItemFormProps) => {
 
   return (
     showForm ? ItemForm
-      : <Button onClick={() => setShowForm(true)} sx={{display: 'block', p: 0, mt: 2, mb: 1}}>
+      : <Button aria-label="create-item" onClick={() => setShowForm(true)}
+        sx={{display: 'block', p: 0, mt: 2, mb: 1}}>
         <ItemStub />
       </Button>
   )

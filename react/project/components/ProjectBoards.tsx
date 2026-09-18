@@ -45,7 +45,8 @@ const ProjectBoards = (props: ProjectBoardsProps) => {
         ))}
         <Grid item xs={6} sm={3} md={2}>
           <Permission code={PermissionCodes.PROJECT_LEADER} project={project} member={member} >
-            <Button onClick={() => setShowBoardForm(true)} sx={{ m: 0, p: 0, width: '100%'}}>
+            <Button aria-label="create-board" onClick={() => setShowBoardForm(true)}
+              sx={{ m: 0, p: 0, width: '100%'}}>
               <BoardStub />
             </Button>
           </Permission>
