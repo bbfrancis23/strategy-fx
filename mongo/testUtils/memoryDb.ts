@@ -1,6 +1,7 @@
 import {MongoMemoryReplSet} from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import db from '@/mongo/db'
+import {MONGODB_MEMORY_SERVER_BINARY_VERSION} from './mongoMemoryServerBinary.mjs'
 
 let mongoServer: MongoMemoryReplSet | undefined
 let previousMongoConnect: string | undefined
@@ -39,16 +40,7 @@ const restoreMongoConnect = () => {
 export const startTestDb = async () => {
   mongoServer = await MongoMemoryReplSet.create({
     replSet: {count: 1},
-    // Pinned to a well-established series rather than mongodb-memory-
-    // server's default (whatever the latest MongoDB release is, currently
-    // 8.x) for determinism. Note: a handshake error hit during development
-    // ("Missing required sub-document 'driver' in the client metadata
-    // document") looked at first like a server-version incompatibility,
-    // but turned out to be an upstream bug in mongodb-memory-server-core's
-    // own bundled mongodb driver (7.6.0) — see the "overrides" entry in
-    // package.json, which pins that nested dependency to 7.5.0. Changing
-    // this binary version alone does not fix it.
-    binary: {version: '7.0.14'},
+    binary: {version: MONGODB_MEMORY_SERVER_BINARY_VERSION},
   })
   previousMongoConnect = process.env.MONGO_CONNECT
   process.env.MONGO_CONNECT = mongoServer.getUri()
