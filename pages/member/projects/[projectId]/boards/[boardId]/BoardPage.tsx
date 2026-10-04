@@ -52,7 +52,7 @@ GetServerSideProps<BoardPage> = async(context) => {
 
 }
 
-export const Page = (props: BoardPage) => {
+const BoardPageContent = (props: BoardPage) => {
 
   const [member, setMember] = useState<Member>(props.member)
 
@@ -85,6 +85,11 @@ export const Page = (props: BoardPage) => {
     </ProjectContext.Provider>
   )
 }
+
+// Keyed by board id so switching boards remounts this tree; Next.js reuses the
+// same component for a new [boardId] and the useState initializers above would
+// otherwise keep showing the previous board.
+export const Page = (props: BoardPage) => <BoardPageContent key={props.board.id} {...props} />
 
 export default Page
 // QA: Brian Francisc 11-23-23
