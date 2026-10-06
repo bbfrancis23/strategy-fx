@@ -1,11 +1,12 @@
 import { useContext, useState, MouseEvent} from "react"
 import { Box, IconButton, Stack, Menu, MenuItem, Fade, MenuProps } from "@mui/material"
-import { alpha, styled, useTheme } from '@mui/material/styles'
+import { alpha, styled } from '@mui/material/styles'
 import PublicIcon from '@mui/icons-material/Public'
 import PrivateIcon from '@mui/icons-material/Lock'
 import DropDownMenuIcon from '@mui/icons-material/ArrowDropDownCircle'
 import { useSnackbar } from "notistack"
 import axios from "axios"
+import router from "next/router"
 import { Member, ProjectMemberAvatar } from "@/react/members"
 import { ProjectContext } from "@/react/project"
 import { BoardTitleForm, BoardOptionsMenu, BoardContext, Board} from "@/react/board"
@@ -23,7 +24,6 @@ export interface BoardToolbarProps { projectBoards: Board[]}
 
 export const BoardToolbar = ({projectBoards}: BoardToolbarProps) => {
 
-  const theme = useTheme()
   const {enqueueSnackbar} = useSnackbar()
   const {project} = useContext(ProjectContext)
   const {board, setBoard} = useContext(BoardContext)
@@ -51,15 +51,19 @@ export const BoardToolbar = ({projectBoards}: BoardToolbarProps) => {
   const showBoardMenu = (event: MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget)
   const onClose = (board: Board):void => setAnchorEl(null)
 
+  const boardDir = `/member/projects/${project.id}/boards/`
+
+  const selectBoard = (boardId: string) => {
+    setAnchorEl(null)
+    router.push(`${boardDir}${boardId}`)
+  }
+
   const menuProps: MenuProps = {
     id: 'board-list',
     TransitionComponent: Fade,
     anchorOrigin: {horizontal: 'center', vertical: 'bottom'},
     anchorEl, open, onClose,
   }
-
-  const boardDir = `/member/projects/${project.id}/boards/`
-  const themeText = theme.palette.text.primary
 
   return (
     <BoardToolbarContainer >
@@ -74,8 +78,8 @@ export const BoardToolbar = ({projectBoards}: BoardToolbarProps) => {
         <IconButton onClick={showBoardMenu} ><DropDownMenuIcon /></IconButton>
         <Menu {...menuProps}>
           { projectBoards.map( (b: Board) => (
-            <MenuItem key={b.id} selected={board.id === b.id}>
-              <a href={`${boardDir}${b.id}`} style={{ color: themeText}}>{b.title}</a>
+            <MenuItem key={b.id} selected={board.id === b.id} onClick={() => selectBoard(b.id)}>
+              {b.title}
             </MenuItem>
           ))}
         </Menu>
