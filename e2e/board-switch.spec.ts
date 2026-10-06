@@ -19,7 +19,9 @@ test('selecting another board from the title dropdown navigates to it', async ({
     await page.getByLabel('New Board').fill(title)
     await page.getByRole('button', {name: 'save'}).click()
     await expect(page.getByText('Board created')).toBeVisible()
-    await expect(page.getByText('Board created')).toBeHidden()
+    // Notistack keeps an exiting snackbar in the DOM after it hides; waiting for
+    // removal stops the second create from matching two "Board created" nodes.
+    await expect(page.getByText('Board created')).toHaveCount(0)
   }
 
   await page.getByRole('button', {name: 'Board One'}).click()
